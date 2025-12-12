@@ -1,0 +1,367 @@
+/**
+ * Dragon Cron Manager - Admin Styles
+ */
+
+/* Health Bar */
+.dcm-health-bar {
+    margin: 15px 0;
+    padding: 12px 15px;
+    background: #fff;
+    border-left: 4px solid #72aee6;
+    box-shadow: 0 1px 1px rgba(0,0,0,0.04);
+}
+
+.dcm-health-bar.dcm-health-warning {
+    border-left-color: #dba617;
+    background: #fcf9e8;
+}
+
+.dcm-health-bar.dcm-health-error {
+    border-left-color: #d63638;
+    background: #fcf0f1;
+}
+
+.dcm-health-item {
+    display: inline-block;
+    margin-right: 20px;
+}
+
+.dcm-health-item .dashicons {
+    vertical-align: text-top;
+    margin-right: 4px;
+}
+
+.dcm-health-warning .dashicons {
+    color: #996800;
+}
+
+.dcm-health-info .dashicons {
+    color: #72aee6;
+}
+
+/* Stats Grid */
+.dcm-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 12px;
+    margin: 20px 0;
+}
+
+.dcm-stat-card {
+    background: #fff;
+    border: 1px solid #dcdcde;
+    border-radius: 4px;
+    padding: 16px;
+    text-align: center;
+}
+
+.dcm-stat-card.dcm-warning {
+    border-left: 4px solid #dba617;
+    background: #fcf9e8;
+}
+
+.dcm-stat-number {
+    font-size: 28px;
+    font-weight: 600;
+    color: #1d2327;
+    line-height: 1.2;
+}
+
+.dcm-stat-label {
+    font-size: 12px;
+    color: #646970;
+    margin-top: 4px;
+}
+
+/* Tabs */
+.nav-tab-wrapper {
+    margin-bottom: 0;
+}
+
+.dcm-tab-content {
+    background: #fff;
+    border: 1px solid #c3c4c7;
+    border-top: none;
+    padding: 20px;
+}
+
+/* Events Table */
+.dcm-events-table .dcm-col-hook {
+    width: 26%;
+}
+
+.dcm-events-table .dcm-col-schedule {
+    width: 10%;
+}
+
+.dcm-events-table .dcm-col-next {
+    width: 16%;
+}
+
+.dcm-events-table .dcm-col-args {
+    width: 16%;
+}
+
+.dcm-events-table .dcm-col-actions {
+    width: 32%;
+    text-align: center;
+}
+
+.dcm-events-table td {
+    vertical-align: middle;
+}
+
+.dcm-overdue {
+    background-color: #fcf0f1 !important;
+}
+
+.dcm-overdue-badge {
+    color: #d63638;
+    font-weight: 500;
+}
+
+/* Badges */
+.dcm-badge {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-weight: 500;
+    text-transform: uppercase;
+    margin-left: 6px;
+    vertical-align: middle;
+}
+
+.dcm-badge-core {
+    background: #f0f0f1;
+    color: #646970;
+}
+
+/* Schedule labels */
+.dcm-schedule {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #f0f6fc;
+    color: #2271b1;
+    border-radius: 3px;
+    font-size: 12px;
+}
+
+.dcm-schedule.dcm-single {
+    background: #f0f0f1;
+    color: #646970;
+}
+
+/* Args */
+.dcm-args {
+    font-size: 11px;
+    max-width: 200px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: block;
+}
+
+.dcm-no-args {
+    color: #a7aaad;
+}
+
+/* Action buttons */
+.dcm-col-actions .button {
+    padding: 0 10px;
+    min-height: 28px;
+    margin: 2px;
+}
+
+.dcm-col-actions .dashicons {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    vertical-align: text-bottom;
+    margin-right: 2px;
+}
+
+.dcm-run-event .dashicons {
+    color: #00a32a;
+}
+
+.dcm-test-event .dashicons {
+    color: #2271b1;
+}
+
+.dcm-trash-event .dashicons {
+    color: #b32d2e;
+}
+
+.dcm-delete-event .dashicons {
+    color: #d63638;
+}
+
+/* Status badges */
+.dcm-status {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+.dcm-status-completed {
+    background: #d7f7c2;
+    color: #1e4620;
+}
+
+.dcm-status-running {
+    background: #f0f6fc;
+    color: #2271b1;
+}
+
+.dcm-status-error {
+    background: #fcf0f1;
+    color: #d63638;
+}
+
+/* Logs */
+.dcm-logs-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dcm-log-stats span {
+    margin-right: 20px;
+    color: #646970;
+}
+
+.dcm-log-error {
+    background-color: #fcf0f1 !important;
+}
+
+.dcm-error-msg {
+    color: #d63638;
+}
+
+/* Running state */
+.dcm-running {
+    opacity: 0.7;
+    pointer-events: none;
+}
+
+.dcm-running .dashicons {
+    animation: dcm-spin 1s linear infinite;
+}
+
+@keyframes dcm-spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Toast notifications */
+.dcm-toast {
+    position: fixed;
+    bottom: 30px;
+    right: 30px;
+    padding: 12px 20px;
+    background: #1d2327;
+    color: #fff;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 100000;
+    animation: dcm-toast-in 0.3s ease;
+}
+
+.dcm-toast.dcm-toast-success {
+    background: #00a32a;
+}
+
+.dcm-toast.dcm-toast-error {
+    background: #d63638;
+}
+
+@keyframes dcm-toast-in {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Trash Tab Count Badge */
+.dcm-trash-count {
+    display: inline-block;
+    min-width: 18px;
+    height: 18px;
+    padding: 0 6px;
+    margin-left: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    line-height: 18px;
+    text-align: center;
+    color: #fff;
+    background: #d63638;
+    border-radius: 9px;
+}
+
+/* Trash Header */
+.dcm-trash-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.dcm-trash-info {
+    margin: 0;
+    color: #646970;
+    font-style: italic;
+}
+
+/* Trash Table */
+.dcm-trash-table .dcm-col-hook {
+    width: 26%;
+}
+
+.dcm-trash-table .dcm-col-schedule {
+    width: 14%;
+}
+
+.dcm-trash-table .dcm-col-trashed {
+    width: 18%;
+}
+
+.dcm-trash-table .dcm-col-expires {
+    width: 14%;
+}
+
+.dcm-trash-table .dcm-col-actions {
+    width: 28%;
+    text-align: center;
+}
+
+.dcm-trash-table td {
+    vertical-align: middle;
+}
+
+/* Expired badge */
+.dcm-expired-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    background: #fcf0f1;
+    color: #d63638;
+    border-radius: 3px;
+    font-size: 11px;
+    font-weight: 500;
+}
+
+/* Trash action buttons */
+.dcm-trash-event .dashicons {
+    color: #646970;
+}
+
+.dcm-restore-event .dashicons {
+    color: #2271b1;
+}

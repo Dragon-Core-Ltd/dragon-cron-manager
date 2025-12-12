@@ -1,0 +1,33 @@
+{
+	"name": "dragoncore/dragon-cron-manager",
+	"description": "View, manage, and debug WordPress cron jobs",
+	"type": "wordpress-plugin",
+	"license": "GPL-2.0-or-later",
+	"authors": [
+		{
+			"name": "Dragon Core",
+			"homepage": "https://dcplugins.com"
+		}
+	],
+	"require": {
+		"php": ">=8.0"
+	},
+	"require-dev": {
+		"squizlabs/php_codesniffer": "^3.7",
+		"wp-coding-standards/wpcs": "^3.0",
+		"phpcompatibility/phpcompatibility-wp": "^2.1",
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+	},
+	"scripts": {
+		"phpcs": "phpcs",
+		"phpcbf": "phpcbf",
+		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor,node_modules .",
+		"lint:fix": "phpcbf --standard=WordPress --extensions=php --ignore=vendor,node_modules ."
+	},
+	"config": {
+		"optimize-autoloader": true,
+		"allow-plugins": {
+			"dealerdirect/phpcodesniffer-composer-installer": true
+		}
+	}
+}

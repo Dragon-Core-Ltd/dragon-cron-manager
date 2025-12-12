@@ -1,0 +1,402 @@
+# Copyright (C) 2025 Dragon Core
+# This file is distributed under the GPL v2 or later.
+msgid ""
+msgstr ""
+"Project-Id-Version: Dragon Cron Manager 1.0.0\n"
+"Report-Msgid-Bugs-To: https://wordpress.org/support/plugin/dragon-cron-manager\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"POT-Creation-Date: 2025-12-11T20:28:43+00:00\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"X-Generator: WP-CLI 2.11.0\n"
+"X-Domain: dragon-cron-manager\n"
+
+#. Plugin Name of the plugin
+#: dragon-cron-manager.php
+#: admin/views/dashboard.php:20
+msgid "Dragon Cron Manager"
+msgstr ""
+
+#. Plugin URI of the plugin
+#: dragon-cron-manager.php
+msgid "https://dcplugins.com/plugins/dragon-cron-manager"
+msgstr ""
+
+#. Description of the plugin
+#: dragon-cron-manager.php
+msgid "View, manage, and debug WordPress cron jobs. See all scheduled events, run them manually, and track execution history."
+msgstr ""
+
+#. Author of the plugin
+#: dragon-cron-manager.php
+msgid "Dragon Core"
+msgstr ""
+
+#. Author URI of the plugin
+#: dragon-cron-manager.php
+msgid "https://dcplugins.com"
+msgstr ""
+
+#: admin/views/dashboard.php:12
+msgid "Cron Events"
+msgstr ""
+
+#: admin/views/dashboard.php:13
+#: admin/views/dashboard.php:145
+msgid "Trash"
+msgstr ""
+
+#: admin/views/dashboard.php:14
+msgid "Execution Log"
+msgstr ""
+
+#: admin/views/dashboard.php:15
+#: includes/class-cron.php:326
+msgid "Schedules"
+msgstr ""
+
+#: admin/views/dashboard.php:49
+#: includes/class-cron.php:321
+msgid "Total Events"
+msgstr ""
+
+#: admin/views/dashboard.php:53
+msgid "Recurring"
+msgstr ""
+
+#: admin/views/dashboard.php:57
+msgid "Overdue"
+msgstr ""
+
+#: admin/views/dashboard.php:61
+msgid "Runs Today"
+msgstr ""
+
+#: admin/views/dashboard.php:85
+#: admin/views/dashboard.php:171
+#: admin/views/dashboard.php:249
+msgid "Hook"
+msgstr ""
+
+#: admin/views/dashboard.php:86
+#: admin/views/dashboard.php:172
+msgid "Schedule"
+msgstr ""
+
+#: admin/views/dashboard.php:87
+msgid "Next Run"
+msgstr ""
+
+#: admin/views/dashboard.php:88
+msgid "Args"
+msgstr ""
+
+#: admin/views/dashboard.php:89
+#: admin/views/dashboard.php:175
+msgid "Actions"
+msgstr ""
+
+#: admin/views/dashboard.php:95
+msgid "No cron events found."
+msgstr ""
+
+#: admin/views/dashboard.php:107
+msgid "WordPress Core"
+msgstr ""
+
+#: admin/views/dashboard.php:115
+#: admin/views/dashboard.php:194
+msgid "Single"
+msgstr ""
+
+#: admin/views/dashboard.php:134
+msgid "Execute now and reschedule next run"
+msgstr ""
+
+#: admin/views/dashboard.php:136
+msgid "Run"
+msgstr ""
+
+#: admin/views/dashboard.php:138
+msgid "Execute now without changing schedule"
+msgstr ""
+
+#: admin/views/dashboard.php:140
+msgid "Test"
+msgstr ""
+
+#: admin/views/dashboard.php:143
+msgid "Move to trash (recoverable for 30 days)"
+msgstr ""
+
+#: admin/views/dashboard.php:159
+msgid "Trashed cron events are automatically deleted after 30 days."
+msgstr ""
+
+#: admin/views/dashboard.php:163
+msgid "Empty Trash"
+msgstr ""
+
+#: admin/views/dashboard.php:173
+msgid "Trashed"
+msgstr ""
+
+#: admin/views/dashboard.php:174
+msgid "Auto-Delete"
+msgstr ""
+
+#: admin/views/dashboard.php:181
+msgid "No trashed cron events."
+msgstr ""
+
+#: admin/views/dashboard.php:198
+msgid "ago"
+msgstr ""
+
+#: admin/views/dashboard.php:203
+msgid "Expired"
+msgstr ""
+
+#. translators: %d: number of days
+#: admin/views/dashboard.php:208
+msgid "%d day"
+msgid_plural "%d days"
+msgstr[0] ""
+msgstr[1] ""
+
+#: admin/views/dashboard.php:215
+msgid "Restore this cron event to active schedule"
+msgstr ""
+
+#: admin/views/dashboard.php:217
+msgid "Restore"
+msgstr ""
+
+#: admin/views/dashboard.php:219
+msgid "Permanently delete - cannot be undone"
+msgstr ""
+
+#: admin/views/dashboard.php:221
+msgid "Delete"
+msgstr ""
+
+#. translators: %d: total number of log entries
+#: admin/views/dashboard.php:235
+msgid "Total: %d"
+msgstr ""
+
+#. translators: %1$d: error count, %2$s: error rate percentage
+#: admin/views/dashboard.php:237
+msgid "Errors: %1$d (%2$s%%)"
+msgstr ""
+
+#. translators: %s: average duration in seconds
+#: admin/views/dashboard.php:239
+msgid "Avg Duration: %ss"
+msgstr ""
+
+#: admin/views/dashboard.php:242
+msgid "Clear Logs"
+msgstr ""
+
+#: admin/views/dashboard.php:250
+msgid "Start Time"
+msgstr ""
+
+#: admin/views/dashboard.php:251
+msgid "Duration"
+msgstr ""
+
+#: admin/views/dashboard.php:252
+msgid "Status"
+msgstr ""
+
+#: admin/views/dashboard.php:258
+msgid "No log entries yet."
+msgstr ""
+
+#: admin/views/dashboard.php:291
+msgid "Name"
+msgstr ""
+
+#: admin/views/dashboard.php:292
+msgid "Interval"
+msgstr ""
+
+#: admin/views/dashboard.php:293
+msgid "Display"
+msgstr ""
+
+#: dragon-cron-manager.php:72
+msgid "Settings"
+msgstr ""
+
+#: includes/class-admin.php:47
+#: includes/class-admin.php:48
+msgid "Cron Manager"
+msgstr ""
+
+#: includes/class-admin.php:85
+msgid "Running..."
+msgstr ""
+
+#: includes/class-admin.php:86
+msgid "Success!"
+msgstr ""
+
+#: includes/class-admin.php:87
+msgid "Error"
+msgstr ""
+
+#: includes/class-admin.php:88
+msgid "Move this cron event to trash?"
+msgstr ""
+
+#: includes/class-admin.php:89
+msgid "Restore this cron event?"
+msgstr ""
+
+#: includes/class-admin.php:90
+msgid ""
+"PERMANENTLY DELETE this cron event?\n"
+"\n"
+"This action CANNOT be undone. The cron event will be gone forever."
+msgstr ""
+
+#: includes/class-admin.php:91
+msgid ""
+"PERMANENTLY DELETE all trashed cron events?\n"
+"\n"
+"This action CANNOT be undone. All items in trash will be gone forever."
+msgstr ""
+
+#: includes/class-admin.php:92
+msgid "Are you sure you want to clear all logs?"
+msgstr ""
+
+#: includes/class-admin.php:103
+#: includes/class-ajax.php:54
+#: includes/class-ajax.php:83
+#: includes/class-ajax.php:113
+#: includes/class-ajax.php:160
+#: includes/class-ajax.php:186
+#: includes/class-ajax.php:220
+#: includes/class-ajax.php:248
+msgid "Permission denied."
+msgstr ""
+
+#: includes/class-ajax.php:64
+#: includes/class-ajax.php:93
+msgid "Invalid hook."
+msgstr ""
+
+#: includes/class-ajax.php:124
+msgid "Invalid parameters."
+msgstr ""
+
+#: includes/class-ajax.php:131
+msgid "Cannot trash core WordPress cron events."
+msgstr ""
+
+#: includes/class-ajax.php:141
+msgid "Cron event moved to trash. It will be permanently deleted in 30 days."
+msgstr ""
+
+#: includes/class-ajax.php:147
+msgid "Failed to trash cron event."
+msgstr ""
+
+#: includes/class-ajax.php:167
+#: includes/class-ajax.php:193
+msgid "Invalid trash ID."
+msgstr ""
+
+#: includes/class-ajax.php:201
+msgid "Cron event permanently deleted."
+msgstr ""
+
+#: includes/class-ajax.php:207
+msgid "Failed to delete cron event."
+msgstr ""
+
+#. translators: %d: number of events deleted
+#: includes/class-ajax.php:229
+msgid "%d cron event permanently deleted."
+msgid_plural "%d cron events permanently deleted."
+msgstr[0] ""
+msgstr[1] ""
+
+#: includes/class-ajax.php:255
+msgid "Logs cleared successfully."
+msgstr ""
+
+#: includes/class-cron.php:111
+msgid "No callbacks registered for this hook."
+msgstr ""
+
+#: includes/class-cron.php:164
+msgid "Cron event executed in %s seconds and rescheduled."
+msgstr ""
+
+#: includes/class-cron.php:165
+msgid "Cron event executed in %s seconds (schedule unchanged)."
+msgstr ""
+
+#: includes/class-cron.php:184
+msgid "Error: %s"
+msgstr ""
+
+#: includes/class-cron.php:265
+msgid "WP-Cron Disabled"
+msgstr ""
+
+#: includes/class-cron.php:266
+msgid "WP-Cron is disabled. Make sure you have a system cron configured."
+msgstr ""
+
+#: includes/class-cron.php:274
+msgid "Alternate Cron"
+msgstr ""
+
+#: includes/class-cron.php:275
+msgid "Using alternate cron method (redirect-based)."
+msgstr ""
+
+#: includes/class-cron.php:296
+msgid "Overdue Events"
+msgstr ""
+
+#: includes/class-cron.php:298
+msgid "%1$d cron events are overdue (oldest: %2$s ago)."
+msgstr ""
+
+#: includes/class-cron.php:310
+msgid "Many Cron Events"
+msgstr ""
+
+#: includes/class-cron.php:312
+msgid "You have %d scheduled cron events. Consider cleaning up unused ones."
+msgstr ""
+
+#: includes/class-cron.php:364
+msgid "%s ago (overdue)"
+msgstr ""
+
+#: includes/class-cron.php:370
+msgid "Less than a minute"
+msgstr ""
+
+#: includes/class-cron.php:505
+msgid "Trashed event not found."
+msgstr ""
+
+#: includes/class-cron.php:526
+msgid "Failed to restore cron event."
+msgstr ""
+
+#: includes/class-cron.php:537
+msgid "Cron event \"%s\" restored successfully."
+msgstr ""
