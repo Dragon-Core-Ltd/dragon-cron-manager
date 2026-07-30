@@ -35,8 +35,8 @@ class Admin {
 	 * Initialize hooks
 	 */
 	private function init_hooks(): void {
-		add_action( 'admin_menu', [ $this, 'add_admin_menu' ] );
-		add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+		add_action( 'admin_menu', array( $this, 'add_admin_menu' ) );
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
 	}
 
 	/**
@@ -48,7 +48,7 @@ class Admin {
 			__( 'Cron Manager', 'dragon-cron-manager' ),
 			'manage_options',
 			'dragon-cron-manager',
-			[ $this, 'render_dashboard_page' ]
+			array( $this, 'render_dashboard_page' )
 		);
 	}
 
@@ -63,14 +63,14 @@ class Admin {
 		wp_enqueue_style(
 			'dcm-admin',
 			DCM_PLUGIN_URL . 'admin/css/admin.css',
-			[],
+			array(),
 			DCM_VERSION
 		);
 
 		wp_enqueue_script(
 			'dcm-admin',
 			DCM_PLUGIN_URL . 'admin/js/admin.js',
-			[ 'jquery' ],
+			array( 'jquery' ),
 			DCM_VERSION,
 			true
 		);
@@ -78,10 +78,10 @@ class Admin {
 		wp_localize_script(
 			'dcm-admin',
 			'dcmAdmin',
-			[
+			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
 				'nonce'   => wp_create_nonce( 'dcm_admin_nonce' ),
-				'i18n'    => [
+				'i18n'    => array(
 					'running'           => __( 'Running...', 'dragon-cron-manager' ),
 					'success'           => __( 'Success!', 'dragon-cron-manager' ),
 					'error'             => __( 'Error', 'dragon-cron-manager' ),
@@ -90,8 +90,8 @@ class Admin {
 					'confirmDelete'     => __( "PERMANENTLY DELETE this cron event?\n\nThis action CANNOT be undone. The cron event will be gone forever.", 'dragon-cron-manager' ),
 					'confirmEmptyTrash' => __( "PERMANENTLY DELETE all trashed cron events?\n\nThis action CANNOT be undone. All items in trash will be gone forever.", 'dragon-cron-manager' ),
 					'confirmClear'      => __( 'Are you sure you want to clear all logs?', 'dragon-cron-manager' ),
-				],
-			]
+				),
+			)
 		);
 	}
 

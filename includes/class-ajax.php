@@ -35,13 +35,13 @@ class Ajax {
 	 * Initialize hooks
 	 */
 	private function init_hooks(): void {
-		add_action( 'wp_ajax_dcm_run_event', [ $this, 'handle_run_event' ] );
-		add_action( 'wp_ajax_dcm_test_event', [ $this, 'handle_test_event' ] );
-		add_action( 'wp_ajax_dcm_trash_event', [ $this, 'handle_trash_event' ] );
-		add_action( 'wp_ajax_dcm_restore_event', [ $this, 'handle_restore_event' ] );
-		add_action( 'wp_ajax_dcm_delete_event', [ $this, 'handle_delete_event' ] );
-		add_action( 'wp_ajax_dcm_empty_trash', [ $this, 'handle_empty_trash' ] );
-		add_action( 'wp_ajax_dcm_clear_logs', [ $this, 'handle_clear_logs' ] );
+		add_action( 'wp_ajax_dcm_run_event', array( $this, 'handle_run_event' ) );
+		add_action( 'wp_ajax_dcm_test_event', array( $this, 'handle_test_event' ) );
+		add_action( 'wp_ajax_dcm_trash_event', array( $this, 'handle_trash_event' ) );
+		add_action( 'wp_ajax_dcm_restore_event', array( $this, 'handle_restore_event' ) );
+		add_action( 'wp_ajax_dcm_delete_event', array( $this, 'handle_delete_event' ) );
+		add_action( 'wp_ajax_dcm_empty_trash', array( $this, 'handle_empty_trash' ) );
+		add_action( 'wp_ajax_dcm_clear_logs', array( $this, 'handle_clear_logs' ) );
 	}
 
 	/**
@@ -51,17 +51,18 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$hook = isset( $_POST['hook'] ) ? sanitize_text_field( wp_unslash( $_POST['hook'] ) ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$args_json = isset( $_POST['args'] ) ? sanitize_text_field( wp_unslash( $_POST['args'] ) ) : '[]';
-		$args      = json_decode( stripslashes( $args_json ), true ) ?: [];
+		$args      = json_decode( stripslashes( $args_json ), true );
+		$args      = is_array( $args ) ? $args : array();
 
 		if ( empty( $hook ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ) );
 		}
 
 		$result = $this->cron->run_event( $hook, $args );
@@ -80,17 +81,18 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$hook = isset( $_POST['hook'] ) ? sanitize_text_field( wp_unslash( $_POST['hook'] ) ) : '';
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$args_json = isset( $_POST['args'] ) ? sanitize_text_field( wp_unslash( $_POST['args'] ) ) : '[]';
-		$args      = json_decode( stripslashes( $args_json ), true ) ?: [];
+		$args      = json_decode( stripslashes( $args_json ), true );
+		$args      = is_array( $args ) ? $args : array();
 
 		if ( empty( $hook ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ) );
 		}
 
 		// Run without rescheduling (test mode)
@@ -110,7 +112,7 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
@@ -121,15 +123,15 @@ class Ajax {
 		$timestamp = isset( $_POST['timestamp'] ) ? absint( $_POST['timestamp'] ) : 0;
 
 		if ( empty( $hook ) || empty( $key ) || ! $timestamp ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid parameters.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Invalid parameters.', 'dragon-cron-manager' ) ) );
 		}
 
 		// Prevent trashing core WordPress cron events
 		if ( $this->cron->is_core_hook( $hook ) ) {
 			wp_send_json_error(
-				[
+				array(
 					'message' => __( 'Cannot trash core WordPress cron events.', 'dragon-cron-manager' ),
-				]
+				)
 			);
 		}
 
@@ -137,15 +139,15 @@ class Ajax {
 
 		if ( $result ) {
 			wp_send_json_success(
-				[
+				array(
 					'message' => __( 'Cron event moved to trash. It will be permanently deleted in 30 days.', 'dragon-cron-manager' ),
-				]
+				)
 			);
 		} else {
 			wp_send_json_error(
-				[
+				array(
 					'message' => __( 'Failed to trash cron event.', 'dragon-cron-manager' ),
-				]
+				)
 			);
 		}
 	}
@@ -157,14 +159,14 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$trash_id = isset( $_POST['trash_id'] ) ? sanitize_text_field( wp_unslash( $_POST['trash_id'] ) ) : '';
 
 		if ( empty( $trash_id ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid trash ID.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Invalid trash ID.', 'dragon-cron-manager' ) ) );
 		}
 
 		$result = $this->cron->restore_event( $trash_id );
@@ -183,29 +185,29 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$trash_id = isset( $_POST['trash_id'] ) ? sanitize_text_field( wp_unslash( $_POST['trash_id'] ) ) : '';
 
 		if ( empty( $trash_id ) ) {
-			wp_send_json_error( [ 'message' => __( 'Invalid trash ID.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Invalid trash ID.', 'dragon-cron-manager' ) ) );
 		}
 
 		$result = $this->cron->delete_trashed_event( $trash_id );
 
 		if ( $result ) {
 			wp_send_json_success(
-				[
+				array(
 					'message' => __( 'Cron event permanently deleted.', 'dragon-cron-manager' ),
-				]
+				)
 			);
 		} else {
 			wp_send_json_error(
-				[
+				array(
 					'message' => __( 'Failed to delete cron event.', 'dragon-cron-manager' ),
-				]
+				)
 			);
 		}
 	}
@@ -217,13 +219,13 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		$count = $this->cron->empty_trash();
 
 		wp_send_json_success(
-			[
+			array(
 				'message' => sprintf(
 					/* translators: %d: number of events deleted */
 					_n(
@@ -234,7 +236,7 @@ class Ajax {
 					),
 					$count
 				),
-			]
+			)
 		);
 	}
 
@@ -245,15 +247,15 @@ class Ajax {
 		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
-			wp_send_json_error( [ 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ] );
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
 		$this->logger->clear_logs();
 
 		wp_send_json_success(
-			[
+			array(
 				'message' => __( 'Logs cleared successfully.', 'dragon-cron-manager' ),
-			]
+			)
 		);
 	}
 }

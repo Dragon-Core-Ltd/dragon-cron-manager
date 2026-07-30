@@ -9,13 +9,13 @@ defined( 'ABSPATH' ) || exit;
 
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are not truly global.
 
-// Variables: $tab, $events, $health, $summary, $schedules, $logs, $log_stats, $trashed_events, $trash_count
-$tabs = [
+// Provided by Admin::render_dashboard_page(): tab, events, health, summary, schedules, logs, log_stats, trashed_events, trash_count.
+$dcm_tabs = array(
 	'events'    => __( 'Cron Events', 'dragon-cron-manager' ),
 	'trash'     => __( 'Trash', 'dragon-cron-manager' ),
 	'logs'      => __( 'Execution Log', 'dragon-cron-manager' ),
 	'schedules' => __( 'Schedules', 'dragon-cron-manager' ),
-];
+);
 ?>
 <div class="wrap dcm-dashboard">
 	<h1 class="wp-heading-inline">
@@ -27,7 +27,7 @@ $tabs = [
 		<div class="dcm-health-bar dcm-health-<?php echo esc_attr( $health['status'] ); ?>">
 			<?php foreach ( $health['issues'] as $dcm_issue ) : ?>
 				<span class="dcm-health-item dcm-health-<?php echo esc_attr( $dcm_issue['type'] ); ?>">
-					<span class="dashicons dashicons-<?php echo $dcm_issue['type'] === 'warning' ? 'warning' : 'info'; ?>"></span>
+					<span class="dashicons dashicons-<?php echo 'warning' === $dcm_issue['type'] ? 'warning' : 'info'; ?>"></span>
 					<strong><?php echo esc_html( $dcm_issue['label'] ); ?>:</strong>
 					<?php echo esc_html( $dcm_issue['message'] ); ?>
 				</span>
@@ -66,7 +66,7 @@ $tabs = [
 
 	<!-- Tabs -->
 	<nav class="nav-tab-wrapper">
-		<?php foreach ( $tabs as $dcm_tab_key => $dcm_tab_label ) : ?>
+		<?php foreach ( $dcm_tabs as $dcm_tab_key => $dcm_tab_label ) : ?>
 			<a href="<?php echo esc_url( add_query_arg( 'tab', $dcm_tab_key ) ); ?>"
 				class="nav-tab <?php echo $tab === $dcm_tab_key ? 'nav-tab-active' : ''; ?>">
 				<?php echo esc_html( $dcm_tab_label ); ?>

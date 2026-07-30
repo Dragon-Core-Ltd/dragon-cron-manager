@@ -24,7 +24,7 @@ class Cron {
 	/**
 	 * Core WordPress cron hooks (should not be deleted)
 	 */
-	private const CORE_HOOKS = [
+	private const CORE_HOOKS = array(
 		'wp_scheduled_delete',
 		'wp_scheduled_auto_draft_delete',
 		'wp_update_plugins',
@@ -34,7 +34,7 @@ class Cron {
 		'wp_site_health_scheduled_check',
 		'recovery_mode_clean_expired_keys',
 		'delete_expired_transients',
-	];
+	);
 
 	/**
 	 * Get all scheduled cron events
@@ -45,27 +45,27 @@ class Cron {
 		$crons = _get_cron_array();
 
 		if ( empty( $crons ) ) {
-			return [];
+			return array();
 		}
 
-		$events = [];
+		$events = array();
 
 		foreach ( $crons as $timestamp => $hooks ) {
 			foreach ( $hooks as $hook => $schedules ) {
 				foreach ( $schedules as $key => $data ) {
-					$events[] = [
+					$events[] = array(
 						'timestamp'    => $timestamp,
 						'hook'         => $hook,
 						'key'          => $key,
 						'schedule'     => $data['schedule'] ?? false,
 						'interval'     => $data['interval'] ?? 0,
-						'args'         => $data['args'] ?? [],
+						'args'         => $data['args'] ?? array(),
 						'next_run'     => $this->format_time_until( $timestamp ),
 						'next_run_raw' => $timestamp - time(),
 						'is_overdue'   => $timestamp < time(),
 						'is_core'      => $this->is_core_hook( $hook ),
 						'is_recurring' => ! empty( $data['schedule'] ),
-					];
+					);
 				}
 			}
 		}
@@ -103,13 +103,13 @@ class Cron {
 	 * @param bool   $reschedule Whether to reschedule recurring events (default true)
 	 * @return array Result with success status and message
 	 */
-	public function run_event( string $hook, array $args = [], bool $reschedule = true ): array {
+	public function run_event( string $hook, array $args = array(), bool $reschedule = true ): array {
 		// Check if hook has any callbacks
 		if ( ! has_action( $hook ) ) {
-			return [
+			return array(
 				'success' => false,
 				'message' => __( 'No callbacks registered for this hook.', 'dragon-cron-manager' ),
-			];
+			);
 		}
 
 		// Get event details for rescheduling
@@ -169,12 +169,12 @@ class Cron {
 				$message = __( 'Cron event executed in %s seconds (schedule unchanged).', 'dragon-cron-manager' );
 			}
 
-			return [
+			return array(
 				'success'     => true,
 				'message'     => sprintf( $message, number_format( $duration, 3 ) ),
 				'duration'    => $duration,
 				'rescheduled' => $rescheduled,
-			];
+			);
 		} catch ( \Throwable $e ) {
 			$duration = microtime( true ) - $start_time;
 
@@ -186,10 +186,10 @@ class Cron {
 			/* translators: %s: error message */
 			$error_message = __( 'Error: %s', 'dragon-cron-manager' );
 
-			return [
+			return array(
 				'success' => false,
 				'message' => sprintf( $error_message, $e->getMessage() ),
-			];
+			);
 		}
 	}
 
@@ -209,7 +209,7 @@ class Cron {
 		}
 
 		// Get args for unscheduling
-		$args = $crons[ $timestamp ][ $hook ][ $key ]['args'] ?? [];
+		$args = $crons[ $timestamp ][ $hook ][ $key ]['args'] ?? array();
 
 		// Unschedule the event
 		$result = wp_unschedule_event( $timestamp, $hook, $args );
@@ -226,7 +226,7 @@ class Cron {
 	 * @param array  $args      Event arguments
 	 * @return bool Success
 	 */
-	public function add_event( string $hook, string $schedule, int $timestamp, array $args = [] ): bool {
+	public function add_event( string $hook, string $schedule, int $timestamp, array $args = array() ): bool {
 		if ( empty( $schedule ) ) {
 			// Single event
 			$result = wp_schedule_single_event( $timestamp, $hook, $args );
@@ -258,28 +258,28 @@ class Cron {
 	 * @return array Health status
 	 */
 	public function get_health(): array {
-		$health = [
+		$health = array(
 			'status' => 'good',
-			'issues' => [],
-			'info'   => [],
-		];
+			'issues' => array(),
+			'info'   => array(),
+		);
 
 		// Check if WP-Cron is disabled
 		if ( defined( 'DISABLE_WP_CRON' ) && DISABLE_WP_CRON ) {
-			$health['info'][] = [
+			$health['info'][] = array(
 				'label'   => __( 'WP-Cron Disabled', 'dragon-cron-manager' ),
 				'message' => __( 'WP-Cron is disabled. Make sure you have a system cron configured.', 'dragon-cron-manager' ),
 				'type'    => 'info',
-			];
+			);
 		}
 
 		// Check if ALTERNATE_WP_CRON is enabled
 		if ( defined( 'ALTERNATE_WP_CRON' ) && ALTERNATE_WP_CRON ) {
-			$health['info'][] = [
+			$health['info'][] = array(
 				'label'   => __( 'Alternate Cron', 'dragon-cron-manager' ),
 				'message' => __( 'Using alternate cron method (redirect-based).', 'dragon-cron-manager' ),
 				'type'    => 'info',
-			];
+			);
 		}
 
 		// Check for overdue events
@@ -299,11 +299,11 @@ class Cron {
 			$health['status'] = 'warning';
 			/* translators: %1$d: number of overdue events, %2$s: time since oldest overdue event */
 			$overdue_message    = __( '%1$d cron events are overdue (oldest: %2$s ago).', 'dragon-cron-manager' );
-			$health['issues'][] = [
+			$health['issues'][] = array(
 				'label'   => __( 'Overdue Events', 'dragon-cron-manager' ),
 				'message' => sprintf( $overdue_message, $overdue_count, human_time_diff( time() - $max_overdue ) ),
 				'type'    => 'warning',
-			];
+			);
 		}
 
 		// Check for very large cron array
@@ -311,23 +311,23 @@ class Cron {
 		if ( $cron_count > 50 ) {
 			/* translators: %d: number of scheduled cron events */
 			$many_events_message = __( 'You have %d scheduled cron events. Consider cleaning up unused ones.', 'dragon-cron-manager' );
-			$health['info'][]    = [
+			$health['info'][]    = array(
 				'label'   => __( 'Many Cron Events', 'dragon-cron-manager' ),
 				'message' => sprintf( $many_events_message, $cron_count ),
 				'type'    => 'info',
-			];
+			);
 		}
 
 		// Add general info
-		$health['info'][] = [
+		$health['info'][] = array(
 			'label' => __( 'Total Events', 'dragon-cron-manager' ),
 			'value' => $cron_count,
-		];
+		);
 
-		$health['info'][] = [
+		$health['info'][] = array(
 			'label' => __( 'Schedules', 'dragon-cron-manager' ),
 			'value' => count( $this->get_schedules() ),
-		];
+		);
 
 		return $health;
 	}
@@ -404,14 +404,14 @@ class Cron {
 			}
 		}
 
-		return [
+		return array(
 			'total'     => $total,
 			'recurring' => $recurring,
 			'single'    => $single,
 			'overdue'   => $overdue,
 			'core'      => $core,
 			'plugins'   => $total - $core,
-		];
+		);
 	}
 
 	/**
@@ -431,22 +431,22 @@ class Cron {
 
 		// Get event data before removing
 		$event_data = $crons[ $timestamp ][ $hook ][ $key ];
-		$args       = $event_data['args'] ?? [];
+		$args       = $event_data['args'] ?? array();
 		$schedule   = $event_data['schedule'] ?? false;
 		$interval   = $event_data['interval'] ?? 0;
 
 		// Store in trash
-		$trashed  = get_option( self::TRASH_OPTION, [] );
+		$trashed  = get_option( self::TRASH_OPTION, array() );
 		$trash_id = uniqid( 'trash_', true );
 
-		$trashed[ $trash_id ] = [
+		$trashed[ $trash_id ] = array(
 			'hook'       => $hook,
 			'args'       => $args,
 			'schedule'   => $schedule,
 			'interval'   => $interval,
 			'trashed_at' => time(),
 			'expires_at' => time() + ( self::TRASH_RETENTION_DAYS * DAY_IN_SECONDS ),
-		];
+		);
 
 		update_option( self::TRASH_OPTION, $trashed );
 
@@ -462,27 +462,27 @@ class Cron {
 	 * @return array Trashed events with expiration info
 	 */
 	public function get_trashed_events(): array {
-		$trashed = get_option( self::TRASH_OPTION, [] );
+		$trashed = get_option( self::TRASH_OPTION, array() );
 
 		if ( empty( $trashed ) ) {
-			return [];
+			return array();
 		}
 
-		$events = [];
+		$events = array();
 		$now    = time();
 
 		foreach ( $trashed as $trash_id => $event ) {
-			$events[] = [
+			$events[] = array(
 				'trash_id'   => $trash_id,
 				'hook'       => $event['hook'],
-				'args'       => $event['args'] ?? [],
+				'args'       => $event['args'] ?? array(),
 				'schedule'   => $event['schedule'] ?? false,
 				'interval'   => $event['interval'] ?? 0,
 				'trashed_at' => $event['trashed_at'],
 				'expires_at' => $event['expires_at'],
 				'days_left'  => max( 0, ceil( ( $event['expires_at'] - $now ) / DAY_IN_SECONDS ) ),
 				'is_expired' => $event['expires_at'] <= $now,
-			];
+			);
 		}
 
 		// Sort by trashed_at descending (newest first)
@@ -498,18 +498,18 @@ class Cron {
 	 * @return array Result with success status and message
 	 */
 	public function restore_event( string $trash_id ): array {
-		$trashed = get_option( self::TRASH_OPTION, [] );
+		$trashed = get_option( self::TRASH_OPTION, array() );
 
 		if ( ! isset( $trashed[ $trash_id ] ) ) {
-			return [
+			return array(
 				'success' => false,
 				'message' => __( 'Trashed event not found.', 'dragon-cron-manager' ),
-			];
+			);
 		}
 
 		$event    = $trashed[ $trash_id ];
 		$hook     = $event['hook'];
-		$args     = $event['args'] ?? [];
+		$args     = $event['args'] ?? array();
 		$schedule = $event['schedule'] ?? false;
 
 		// Re-schedule the event
@@ -522,10 +522,10 @@ class Cron {
 		}
 
 		if ( false === $result ) {
-			return [
+			return array(
 				'success' => false,
 				'message' => __( 'Failed to restore cron event.', 'dragon-cron-manager' ),
-			];
+			);
 		}
 
 		// Remove from trash
@@ -535,10 +535,10 @@ class Cron {
 		/* translators: %s: cron hook name */
 		$restored_message = __( 'Cron event "%s" restored successfully.', 'dragon-cron-manager' );
 
-		return [
+		return array(
 			'success' => true,
 			'message' => sprintf( $restored_message, $hook ),
-		];
+		);
 	}
 
 	/**
@@ -548,7 +548,7 @@ class Cron {
 	 * @return bool Success
 	 */
 	public function delete_trashed_event( string $trash_id ): bool {
-		$trashed = get_option( self::TRASH_OPTION, [] );
+		$trashed = get_option( self::TRASH_OPTION, array() );
 
 		if ( ! isset( $trashed[ $trash_id ] ) ) {
 			return false;
@@ -566,7 +566,7 @@ class Cron {
 	 * @return int Number of events deleted
 	 */
 	public function empty_trash(): int {
-		$trashed = get_option( self::TRASH_OPTION, [] );
+		$trashed = get_option( self::TRASH_OPTION, array() );
 		$count   = count( $trashed );
 
 		delete_option( self::TRASH_OPTION );
@@ -580,7 +580,7 @@ class Cron {
 	 * @return int Number of events purged
 	 */
 	public function cleanup_expired_trash(): int {
-		$trashed = get_option( self::TRASH_OPTION, [] );
+		$trashed = get_option( self::TRASH_OPTION, array() );
 
 		if ( empty( $trashed ) ) {
 			return 0;
@@ -609,7 +609,7 @@ class Cron {
 	 * @return int Number of trashed events
 	 */
 	public function get_trash_count(): int {
-		$trashed = get_option( self::TRASH_OPTION, [] );
+		$trashed = get_option( self::TRASH_OPTION, array() );
 		return count( $trashed );
 	}
 }

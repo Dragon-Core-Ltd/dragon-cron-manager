@@ -31,7 +31,7 @@ class Logger {
 	 */
 	private function init_hooks(): void {
 		// Clean up old logs daily
-		add_action( 'dcm_cleanup_logs', [ $this, 'cleanup_old_logs' ] );
+		add_action( 'dcm_cleanup_logs', array( $this, 'cleanup_old_logs' ) );
 
 		// Schedule cleanup if not scheduled
 		if ( ! wp_next_scheduled( 'dcm_cleanup_logs' ) ) {
@@ -46,7 +46,7 @@ class Logger {
 	 * @param array  $args Event arguments
 	 * @return int Log entry ID
 	 */
-	public function log_start( string $hook, array $args = [] ): int {
+	public function log_start( string $hook, array $args = array() ): int {
 		if ( ! get_option( 'dcm_log_enabled', true ) ) {
 			return 0;
 		}
@@ -56,13 +56,13 @@ class Logger {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery -- Custom logging table, no WP API available.
 		$wpdb->insert(
 			$this->table,
-			[
+			array(
 				'hook'       => $hook,
 				'args'       => wp_json_encode( $args ),
 				'start_time' => current_time( 'mysql' ),
 				'status'     => 'running',
-			],
-			[ '%s', '%s', '%s', '%s' ]
+			),
+			array( '%s', '%s', '%s', '%s' )
 		);
 
 		return $wpdb->insert_id;
@@ -84,14 +84,14 @@ class Logger {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		$wpdb->update(
 			$this->table,
-			[
+			array(
 				'end_time' => current_time( 'mysql' ),
 				'duration' => $duration,
 				'status'   => 'completed',
-			],
-			[ 'id' => $log_id ],
-			[ '%s', '%f', '%s' ],
-			[ '%d' ]
+			),
+			array( 'id' => $log_id ),
+			array( '%s', '%f', '%s' ),
+			array( '%d' )
 		);
 	}
 
@@ -112,15 +112,15 @@ class Logger {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		$wpdb->update(
 			$this->table,
-			[
+			array(
 				'end_time'      => current_time( 'mysql' ),
 				'duration'      => $duration,
 				'status'        => 'error',
 				'error_message' => $error,
-			],
-			[ 'id' => $log_id ],
-			[ '%s', '%f', '%s', '%s' ],
-			[ '%d' ]
+			),
+			array( 'id' => $log_id ),
+			array( '%s', '%f', '%s', '%s' ),
+			array( '%d' )
 		);
 	}
 
@@ -136,7 +136,7 @@ class Logger {
 		global $wpdb;
 
 		$where  = '';
-		$params = [];
+		$params = array();
 
 		if ( ! empty( $hook ) ) {
 			$where    = 'WHERE hook = %s';
@@ -149,11 +149,13 @@ class Logger {
 		$query = "SELECT * FROM {$this->table} {$where} ORDER BY start_time DESC LIMIT %d OFFSET %d";
 
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL,PluginCheck.Security.DirectDB -- Query safely built with prepare(); table from $wpdb->prefix.
-		return $wpdb->get_results(
+		$results = $wpdb->get_results(
 			$wpdb->prepare( $query, ...$params ),
 			ARRAY_A
-		) ?: [];
+		);
 		// phpcs:enable
+
+		return is_array( $results ) ? $results : array();
 	}
 
 	/**
@@ -166,9 +168,10 @@ class Logger {
 		global $wpdb;
 
 		if ( ! empty( $hook ) ) {
-			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 			return (int) $wpdb->get_var(
 				$wpdb->prepare(
+					// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name built from $wpdb->prefix.
 					"SELECT COUNT(*) FROM {$this->table} WHERE hook = %s",
 					$hook
 				)
@@ -189,9 +192,10 @@ class Logger {
 	public function get_hook_history( string $hook, int $limit = 10 ): array {
 		global $wpdb;
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
-		return $wpdb->get_results(
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
+		$results = $wpdb->get_results(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name built from $wpdb->prefix.
 				"SELECT * FROM {$this->table}
                  WHERE hook = %s
                  ORDER BY start_time DESC
@@ -200,7 +204,9 @@ class Logger {
 				$limit
 			),
 			ARRAY_A
-		) ?: [];
+		);
+
+		return is_array( $results ) ? $results : array();
 	}
 
 	/**
@@ -219,22 +225,23 @@ class Logger {
         // phpcs:enable
 
 		// Get today's count.
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		$today = (int) $wpdb->get_var(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name built from $wpdb->prefix.
 				"SELECT COUNT(*) FROM {$this->table} WHERE DATE(start_time) = %s",
 				current_time( 'Y-m-d' )
 			)
 		);
 
-		return [
+		return array(
 			'total'        => $total,
 			'completed'    => $completed,
 			'errors'       => $errors,
 			'error_rate'   => $total > 0 ? round( ( $errors / $total ) * 100, 1 ) : 0,
 			'avg_duration' => round( $avg_duration, 3 ),
 			'today'        => $today,
-		];
+		);
 	}
 
 	/**
@@ -245,9 +252,10 @@ class Logger {
 
 		$retention_days = (int) get_option( 'dcm_log_retention_days', 7 );
 
-		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		$wpdb->query(
 			$wpdb->prepare(
+				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name built from $wpdb->prefix.
 				"DELETE FROM {$this->table} WHERE start_time < DATE_SUB(NOW(), INTERVAL %d DAY)",
 				$retention_days
 			)
@@ -275,8 +283,8 @@ class Logger {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		return (bool) $wpdb->delete(
 			$this->table,
-			[ 'id' => $log_id ],
-			[ '%d' ]
+			array( 'id' => $log_id ),
+			array( '%d' )
 		);
 	}
 }

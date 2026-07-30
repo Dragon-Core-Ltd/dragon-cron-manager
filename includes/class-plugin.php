@@ -54,7 +54,7 @@ class Plugin {
 	 * Initialize WordPress hooks
 	 */
 	private function init_hooks(): void {
-		add_action( 'dcm_cleanup_trash', [ $this, 'cleanup_expired_trash' ] );
+		add_action( 'dcm_cleanup_trash', array( $this, 'cleanup_expired_trash' ) );
 	}
 
 	/**
@@ -117,10 +117,10 @@ class Plugin {
 	 * Set default plugin options
 	 */
 	private static function set_default_options(): void {
-		$defaults = [
+		$defaults = array(
 			'dcm_log_retention_days' => 7,
 			'dcm_log_enabled'        => true,
-		];
+		);
 
 		foreach ( $defaults as $option => $value ) {
 			if ( false === get_option( $option ) ) {
