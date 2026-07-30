@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: Dragon Cron Manager
- * Plugin URI: https://dcplugins.com/plugins/dragon-cron-manager
+ * Plugin URI: https://dragoncore.ltd/plugins/dragon-cron-manager
  * Description: View, manage, and debug WordPress cron jobs. See all scheduled events, run them manually, and track execution history.
  * Version: 1.0.0
  * Author: Dragon Core
- * Author URI: https://dcplugins.com
+ * Author URI: https://dragoncore.ltd
  * License: GPL v2 or later
  * License URI: https://www.gnu.org/licenses/gpl-2.0.html
  * Text Domain: dragon-cron-manager
