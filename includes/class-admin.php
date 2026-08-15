@@ -62,16 +62,16 @@ class Admin {
 
 		wp_enqueue_style(
 			'dcm-admin',
-			DCM_PLUGIN_URL . 'admin/css/admin.css',
+			DRAGONCRONMANAGER_PLUGIN_URL . 'admin/css/admin.css',
 			array(),
-			DCM_VERSION
+			DRAGONCRONMANAGER_VERSION
 		);
 
 		wp_enqueue_script(
 			'dcm-admin',
-			DCM_PLUGIN_URL . 'admin/js/admin.js',
+			DRAGONCRONMANAGER_PLUGIN_URL . 'admin/js/admin.js',
 			array( 'jquery' ),
-			DCM_VERSION,
+			DRAGONCRONMANAGER_VERSION,
 			true
 		);
 
@@ -80,7 +80,7 @@ class Admin {
 			'dcmAdmin',
 			array(
 				'ajaxUrl' => admin_url( 'admin-ajax.php' ),
-				'nonce'   => wp_create_nonce( 'dcm_admin_nonce' ),
+				'nonce'   => wp_create_nonce( 'dragoncronmanager_admin_nonce' ),
 				'i18n'    => array(
 					'running'           => __( 'Running...', 'dragon-cron-manager' ),
 					'success'           => __( 'Success!', 'dragon-cron-manager' ),
@@ -115,6 +115,6 @@ class Admin {
 		$trashed_events = $this->cron->get_trashed_events();
 		$trash_count    = count( $trashed_events );
 
-		include DCM_PLUGIN_DIR . 'admin/views/dashboard.php';
+		include DRAGONCRONMANAGER_PLUGIN_DIR . 'admin/views/dashboard.php';
 	}
 }

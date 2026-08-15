@@ -31,11 +31,11 @@ class Logger {
 	 */
 	private function init_hooks(): void {
 		// Clean up old logs daily
-		add_action( 'dcm_cleanup_logs', array( $this, 'cleanup_old_logs' ) );
+		add_action( 'dragoncronmanager_cleanup_logs', array( $this, 'cleanup_old_logs' ) );
 
 		// Schedule cleanup if not scheduled
-		if ( ! wp_next_scheduled( 'dcm_cleanup_logs' ) ) {
-			wp_schedule_event( time(), 'daily', 'dcm_cleanup_logs' );
+		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_logs' ) ) {
+			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_logs' );
 		}
 	}
 
@@ -47,7 +47,7 @@ class Logger {
 	 * @return int Log entry ID
 	 */
 	public function log_start( string $hook, array $args = array() ): int {
-		if ( ! get_option( 'dcm_log_enabled', true ) ) {
+		if ( ! get_option( 'dragoncronmanager_log_enabled', true ) ) {
 			return 0;
 		}
 
@@ -250,7 +250,7 @@ class Logger {
 	public function cleanup_old_logs(): void {
 		global $wpdb;
 
-		$retention_days = (int) get_option( 'dcm_log_retention_days', 7 );
+		$retention_days = (int) get_option( 'dragoncronmanager_log_retention_days', 7 );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		$wpdb->query(

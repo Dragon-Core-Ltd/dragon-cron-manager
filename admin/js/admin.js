@@ -33,7 +33,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_run_event',
+                action: 'dragoncronmanager_run_event',
                 nonce: dcmAdmin.nonce,
                 hook: hook,
                 args: JSON.stringify(args)
@@ -73,7 +73,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_test_event',
+                action: 'dragoncronmanager_test_event',
                 nonce: dcmAdmin.nonce,
                 hook: hook,
                 args: JSON.stringify(args)
@@ -114,7 +114,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_trash_event',
+                action: 'dragoncronmanager_trash_event',
                 nonce: dcmAdmin.nonce,
                 hook: hook,
                 key: key,
@@ -160,7 +160,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_restore_event',
+                action: 'dragoncronmanager_restore_event',
                 nonce: dcmAdmin.nonce,
                 trash_id: trashId
             },
@@ -204,7 +204,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_delete_event',
+                action: 'dragoncronmanager_delete_event',
                 nonce: dcmAdmin.nonce,
                 trash_id: trashId
             },
@@ -241,7 +241,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_empty_trash',
+                action: 'dragoncronmanager_empty_trash',
                 nonce: dcmAdmin.nonce
             },
             success: function(response) {
@@ -277,7 +277,7 @@
             url: dcmAdmin.ajaxUrl,
             type: 'POST',
             data: {
-                action: 'dcm_clear_logs',
+                action: 'dragoncronmanager_clear_logs',
                 nonce: dcmAdmin.nonce
             },
             success: function(response) {

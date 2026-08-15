@@ -14,7 +14,7 @@ class Cron {
 	/**
 	 * Option name for trashed crons
 	 */
-	private const TRASH_OPTION = 'dcm_trashed_crons';
+	private const TRASH_OPTION = 'dragoncronmanager_trashed_crons';
 
 	/**
 	 * Trash retention period in days

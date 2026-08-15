@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.0
+Stable tag: 1.0.2
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -81,6 +81,12 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 4. Health check status bar
 
 == Changelog ==
+
+= 1.0.2 =
+* Fix: settings and trashed-cron recovery data are now carried safely on a deactivate then reactivate update.
+
+= 1.0.1 =
+* Renamed all option, hook, function and constant prefixes to the unique `dragoncronmanager_` / `DRAGONCRONMANAGER_` prefix. Existing settings and cleanup schedules are migrated automatically on update; the log table is unaffected.
 
 = 1.0.0 =
 * Initial release

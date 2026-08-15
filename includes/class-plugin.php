@@ -36,8 +36,51 @@ class Plugin {
 	 * Constructor
 	 */
 	private function __construct() {
+		self::migrate_legacy_prefix();
 		$this->init_components();
 		$this->init_hooks();
+	}
+
+	/**
+	 * Move options and scheduled events off the pre-1.0.1 three-letter (dcm_)
+	 * prefix.
+	 *
+	 * The prefix was renamed to the namespace-derived `dragoncronmanager_` to
+	 * satisfy the WordPress.org uniqueness rule. Option values are carried across
+	 * once and the two cleanup events are re-pointed at the renamed hooks. The
+	 * log table keeps its `dcm_log` name (matched by exact name), so log history
+	 * is untouched.
+	 */
+	private static function migrate_legacy_prefix(): void {
+		// db_version is a schema marker managed by activation, not user data.
+		delete_option( 'dcm_db_version' );
+
+		// Includes trashed_crons — the recovery payload for cron events the user
+		// moved to Trash (unscheduled from WP-cron; restorable for 30 days).
+		$options = array( 'log_enabled', 'log_retention_days', 'trashed_crons' );
+
+		// Copy each legacy value onto the new name, then remove the legacy copy —
+		// per option, so the delete only ever runs after a successful copy. (A
+		// single shared guard would delete on a deactivate/reactivate cycle, where
+		// activation re-stamps the new db_version before the copy could run.)
+		foreach ( $options as $name ) {
+			$legacy = get_option( 'dcm_' . $name, null );
+			if ( null !== $legacy ) {
+				update_option( 'dragoncronmanager_' . $name, $legacy );
+				delete_option( 'dcm_' . $name );
+			}
+		}
+
+		foreach ( array( 'dcm_cleanup_logs', 'dcm_cleanup_trash' ) as $legacy_hook ) {
+			$timestamp = wp_next_scheduled( $legacy_hook );
+			if ( $timestamp ) {
+				wp_unschedule_event( $timestamp, $legacy_hook );
+			}
+		}
+
+		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_trash' ) ) {
+			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_trash' );
+		}
 	}
 
 	/**
@@ -54,7 +97,7 @@ class Plugin {
 	 * Initialize WordPress hooks
 	 */
 	private function init_hooks(): void {
-		add_action( 'dcm_cleanup_trash', array( $this, 'cleanup_expired_trash' ) );
+		add_action( 'dragoncronmanager_cleanup_trash', array( $this, 'cleanup_expired_trash' ) );
 	}
 
 	/**
@@ -65,8 +108,8 @@ class Plugin {
 		self::set_default_options();
 
 		// Schedule trash cleanup (runs daily)
-		if ( ! wp_next_scheduled( 'dcm_cleanup_trash' ) ) {
-			wp_schedule_event( time(), 'daily', 'dcm_cleanup_trash' );
+		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_trash' ) ) {
+			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_trash' );
 		}
 
 		flush_rewrite_rules();
@@ -77,8 +120,8 @@ class Plugin {
 	 */
 	public static function deactivate(): void {
 		// Clear scheduled cron events
-		wp_clear_scheduled_hook( 'dcm_cleanup_logs' );
-		wp_clear_scheduled_hook( 'dcm_cleanup_trash' );
+		wp_clear_scheduled_hook( 'dragoncronmanager_cleanup_logs' );
+		wp_clear_scheduled_hook( 'dragoncronmanager_cleanup_trash' );
 		flush_rewrite_rules();
 	}
 
@@ -110,7 +153,7 @@ class Plugin {
 		require_once ABSPATH . 'wp-admin/includes/upgrade.php';
 		dbDelta( $sql_log );
 
-		update_option( 'dcm_db_version', DCM_VERSION );
+		update_option( 'dragoncronmanager_db_version', DRAGONCRONMANAGER_VERSION );
 	}
 
 	/**
@@ -118,8 +161,8 @@ class Plugin {
 	 */
 	private static function set_default_options(): void {
 		$defaults = array(
-			'dcm_log_retention_days' => 7,
-			'dcm_log_enabled'        => true,
+			'dragoncronmanager_log_retention_days' => 7,
+			'dragoncronmanager_log_enabled'        => true,
 		);
 
 		foreach ( $defaults as $option => $value ) {

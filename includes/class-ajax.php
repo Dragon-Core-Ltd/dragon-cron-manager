@@ -35,20 +35,20 @@ class Ajax {
 	 * Initialize hooks
 	 */
 	private function init_hooks(): void {
-		add_action( 'wp_ajax_dcm_run_event', array( $this, 'handle_run_event' ) );
-		add_action( 'wp_ajax_dcm_test_event', array( $this, 'handle_test_event' ) );
-		add_action( 'wp_ajax_dcm_trash_event', array( $this, 'handle_trash_event' ) );
-		add_action( 'wp_ajax_dcm_restore_event', array( $this, 'handle_restore_event' ) );
-		add_action( 'wp_ajax_dcm_delete_event', array( $this, 'handle_delete_event' ) );
-		add_action( 'wp_ajax_dcm_empty_trash', array( $this, 'handle_empty_trash' ) );
-		add_action( 'wp_ajax_dcm_clear_logs', array( $this, 'handle_clear_logs' ) );
+		add_action( 'wp_ajax_dragoncronmanager_run_event', array( $this, 'handle_run_event' ) );
+		add_action( 'wp_ajax_dragoncronmanager_test_event', array( $this, 'handle_test_event' ) );
+		add_action( 'wp_ajax_dragoncronmanager_trash_event', array( $this, 'handle_trash_event' ) );
+		add_action( 'wp_ajax_dragoncronmanager_restore_event', array( $this, 'handle_restore_event' ) );
+		add_action( 'wp_ajax_dragoncronmanager_delete_event', array( $this, 'handle_delete_event' ) );
+		add_action( 'wp_ajax_dragoncronmanager_empty_trash', array( $this, 'handle_empty_trash' ) );
+		add_action( 'wp_ajax_dragoncronmanager_clear_logs', array( $this, 'handle_clear_logs' ) );
 	}
 
 	/**
 	 * Handle run event request
 	 */
 	public function handle_run_event(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
@@ -78,7 +78,7 @@ class Ajax {
 	 * Handle test event request (run without rescheduling)
 	 */
 	public function handle_test_event(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
@@ -109,7 +109,7 @@ class Ajax {
 	 * Handle trash event request (move to trash instead of permanent delete)
 	 */
 	public function handle_trash_event(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
@@ -156,7 +156,7 @@ class Ajax {
 	 * Handle restore event request (restore from trash)
 	 */
 	public function handle_restore_event(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
@@ -182,7 +182,7 @@ class Ajax {
 	 * Handle permanent delete event request (delete from trash)
 	 */
 	public function handle_delete_event(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
@@ -216,7 +216,7 @@ class Ajax {
 	 * Handle empty trash request
 	 */
 	public function handle_empty_trash(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
@@ -244,7 +244,7 @@ class Ajax {
 	 * Handle clear logs request
 	 */
 	public function handle_clear_logs(): void {
-		check_ajax_referer( 'dcm_admin_nonce', 'nonce' );
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
 		if ( ! current_user_can( 'manage_options' ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
