@@ -298,4 +298,49 @@
         });
     });
 
+    /**
+     * Cron doctor: run the diagnosis and render findings.
+     * Findings are rendered with .text() — server strings only, no HTML.
+     */
+    $(document).on('click', '.dcm-diagnose-btn', function() {
+        const $btn = $(this);
+        const $panel = $('.dcm-doctor-results');
+        const $findings = $panel.find('.dcm-doctor-findings');
+
+        $btn.prop('disabled', true).text(dcmAdmin.i18n.diagnosing);
+
+        $.ajax({
+            url: dcmAdmin.ajaxUrl,
+            method: 'POST',
+            data: {
+                action: 'dragoncronmanager_diagnose',
+                nonce: dcmAdmin.nonce
+            },
+            success: function(response) {
+                if (!response.success) {
+                    showToast((response.data && response.data.message) || dcmAdmin.i18n.error, 'error');
+                    return;
+                }
+                $findings.empty();
+                $panel.find('.dcm-doctor-last-activity').text(response.data.last_activity || '');
+                (response.data.findings || []).forEach(function(f) {
+                    const $card = $('<div>').addClass('dcm-doctor-finding dcm-doctor-' + f.severity);
+                    $('<strong>').text(f.title).appendTo($card);
+                    $('<p>').text(f.detail).appendTo($card);
+                    if (f.fix) {
+                        $('<p>').addClass('description').text(f.fix).appendTo($card);
+                    }
+                    $findings.append($card);
+                });
+                $panel.prop('hidden', false);
+            },
+            error: function() {
+                showToast(dcmAdmin.i18n.error, 'error');
+            },
+            complete: function() {
+                $btn.prop('disabled', false).text(dcmAdmin.i18n.diagnose);
+            }
+        });
+    });
+
 })(jQuery);

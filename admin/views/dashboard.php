@@ -41,8 +41,18 @@ $dragoncronmanager_tabs = array(
 					</span>
 				<?php endif; ?>
 			<?php endforeach; ?>
+			<span class="dcm-health-item">
+				<button type="button" class="button button-secondary dcm-diagnose-btn"><?php esc_html_e( 'Diagnose', 'dragon-cron-manager' ); ?></button>
+			</span>
 		</div>
 	<?php endif; ?>
+
+	<!-- Cron doctor results (filled by the Diagnose button) -->
+	<div class="dcm-doctor-results" hidden>
+		<h2><?php esc_html_e( 'Diagnosis', 'dragon-cron-manager' ); ?></h2>
+		<p class="dcm-doctor-last-activity"></p>
+		<div class="dcm-doctor-findings"></div>
+	</div>
 
 	<!-- Stats Cards -->
 	<div class="dcm-stats-grid">
@@ -310,4 +320,9 @@ $dragoncronmanager_tabs = array(
 			</table>
 		<?php endif; ?>
 	</div>
+
+	<p class="dcm-family-note description">
+		<?php esc_html_e( 'Part of the Dragon Core plugin family.', 'dragon-cron-manager' ); ?>
+		<a href="https://dragoncore.ltd/plugins" target="_blank" rel="noopener"><?php esc_html_e( 'See all plugins', 'dragon-cron-manager' ); ?></a>
+	</p>
 </div>

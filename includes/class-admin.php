@@ -90,6 +90,8 @@ class Admin {
 					'confirmDelete'     => __( "PERMANENTLY DELETE this cron event?\n\nThis action CANNOT be undone. The cron event will be gone forever.", 'dragon-cron-manager' ),
 					'confirmEmptyTrash' => __( "PERMANENTLY DELETE all trashed cron events?\n\nThis action CANNOT be undone. All items in trash will be gone forever.", 'dragon-cron-manager' ),
 					'confirmClear'      => __( 'Are you sure you want to clear all logs?', 'dragon-cron-manager' ),
+					'diagnose'          => __( 'Diagnose', 'dragon-cron-manager' ),
+					'diagnosing'        => __( 'Diagnosing…', 'dragon-cron-manager' ),
 				),
 			)
 		);

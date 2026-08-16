@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.2
+Stable tag: 1.0.3
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -21,7 +21,7 @@ Dragon Cron Manager gives you complete visibility and control over WordPress sch
 * **Test Mode** - Run a cron without changing its schedule (perfect for debugging)
 * **Trash Bin** - Deleted crons go to trash and can be restored for 30 days
 * **Execution Log** - Track when crons ran, how long they took, and any errors
-* **Health Check** - Detect issues like disabled WP-Cron or overdue events
+* **Health Check + Cron Doctor** - Overdue and config issues at a glance, plus a one-click diagnosis that tells you WHY cron is stuck: missing system cron (with the crontab line), failing loopback (with the exact error), or a crashed run holding the lock
 * **Schedules Overview** - See all registered cron intervals
 
 **What makes it different:**
@@ -81,6 +81,9 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 4. Health check status bar
 
 == Changelog ==
+
+= 1.0.3 =
+* New: a Diagnose button in the health bar. When your cron is stuck it tells you WHY — a missing system cron (with the crontab line to add), a failing loopback request (with the exact error), a crashed run holding the lock, or a starved queue — instead of just listing overdue tasks.
 
 = 1.0.2 =
 * Fix: settings and trashed-cron recovery data are now carried safely on a deactivate then reactivate update.

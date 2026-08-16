@@ -42,6 +42,35 @@ class Ajax {
 		add_action( 'wp_ajax_dragoncronmanager_delete_event', array( $this, 'handle_delete_event' ) );
 		add_action( 'wp_ajax_dragoncronmanager_empty_trash', array( $this, 'handle_empty_trash' ) );
 		add_action( 'wp_ajax_dragoncronmanager_clear_logs', array( $this, 'handle_clear_logs' ) );
+		add_action( 'wp_ajax_dragoncronmanager_diagnose', array( $this, 'handle_diagnose' ) );
+	}
+
+	/**
+	 * Run the cron doctor (on demand — the loopback test is a live HTTP call).
+	 */
+	public function handle_diagnose(): void {
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
+		}
+
+		$result   = ( new Doctor( $this->cron ) )->diagnose();
+		$last     = (int) ( $result['signals']['last_log_activity'] ?? 0 );
+		$last_str = $last > 0
+			? sprintf(
+				/* translators: %s: human time diff */
+				__( 'Last logged cron activity: %s ago.', 'dragon-cron-manager' ),
+				human_time_diff( $last )
+			)
+			: __( 'No logged cron activity yet.', 'dragon-cron-manager' );
+
+		wp_send_json_success(
+			array(
+				'findings'      => $result['findings'],
+				'last_activity' => $last_str,
+			)
+		);
 	}
 
 	/**
