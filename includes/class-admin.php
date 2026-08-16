@@ -61,9 +61,16 @@ class Admin {
 		}
 
 		wp_enqueue_style(
+			'dragon-cron-manager-dragon-ui',
+			DRAGONCRONMANAGER_PLUGIN_URL . 'admin/css/dragon-ui.css',
+			array(),
+			DRAGONCRONMANAGER_VERSION
+		);
+
+		wp_enqueue_style(
 			'dcm-admin',
 			DRAGONCRONMANAGER_PLUGIN_URL . 'admin/css/admin.css',
-			array(),
+			array( 'dragon-cron-manager-dragon-ui' ),
 			DRAGONCRONMANAGER_VERSION
 		);
 

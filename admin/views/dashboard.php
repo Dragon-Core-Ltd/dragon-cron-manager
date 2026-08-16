@@ -17,8 +17,8 @@ $dragoncronmanager_tabs = array(
 	'schedules' => __( 'Schedules', 'dragon-cron-manager' ),
 );
 ?>
-<div class="wrap dcm-dashboard">
-	<h1 class="wp-heading-inline">
+<div class="wrap dragon-ui dcm-dashboard">
+	<h1 class="dragon-title wp-heading-inline"><span class="dragon-mark" aria-hidden="true"></span>
 		<?php esc_html_e( 'Dragon Cron Manager', 'dragon-cron-manager' ); ?>
 	</h1>
 
