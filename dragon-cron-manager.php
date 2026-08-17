@@ -3,7 +3,7 @@
  * Plugin Name: Dragon Cron Manager
  * Plugin URI: https://dragoncore.ltd/plugins/dragon-cron-manager
  * Description: View, manage, and debug WordPress cron jobs. See all scheduled events, run them manually, and track execution history.
- * Version: 1.0.4
+ * Version: 1.0.5
  * Author: Dragon Core
  * Author URI: https://dragoncore.ltd
  * License: GPL v2 or later
@@ -23,7 +23,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 // Plugin constants - DCM is the standard prefix for Dragon Cron Manager.
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedConstantFound
-define( 'DRAGONCRONMANAGER_VERSION', '1.0.4' );
+define( 'DRAGONCRONMANAGER_VERSION', '1.0.5' );
 define( 'DRAGONCRONMANAGER_PLUGIN_FILE', __FILE__ );
 define( 'DRAGONCRONMANAGER_PLUGIN_DIR', plugin_dir_path( __FILE__ ) );
 define( 'DRAGONCRONMANAGER_PLUGIN_URL', plugin_dir_url( __FILE__ ) );
