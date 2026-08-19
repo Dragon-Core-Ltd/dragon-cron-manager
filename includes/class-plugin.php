@@ -7,6 +7,8 @@
 
 namespace DragonCronManager;
 
+defined( 'ABSPATH' ) || exit;
+
 class Plugin {
 
 	/**
@@ -52,6 +54,12 @@ class Plugin {
 	 * is untouched.
 	 */
 	private static function migrate_legacy_prefix(): void {
+		// Run once, not per request: the marker is autoloaded so this check is
+		// free, while the get_option() misses below each cost a query forever.
+		if ( get_option( 'dragoncronmanager_prefix_migrated' ) ) {
+			return;
+		}
+
 		// db_version is a schema marker managed by activation, not user data.
 		delete_option( 'dcm_db_version' );
 
@@ -81,6 +89,16 @@ class Plugin {
 		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_trash' ) ) {
 			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_trash' );
 		}
+
+		// Flip the trash payload out of autoload on existing installs — it is
+		// only read on the admin screen but was loading on every request.
+		$dragoncronmanager_trash = get_option( 'dragoncronmanager_trashed_crons', null );
+		if ( null !== $dragoncronmanager_trash ) {
+			delete_option( 'dragoncronmanager_trashed_crons' );
+			add_option( 'dragoncronmanager_trashed_crons', $dragoncronmanager_trash, '', false );
+		}
+
+		update_option( 'dragoncronmanager_prefix_migrated', 1 );
 	}
 
 	/**

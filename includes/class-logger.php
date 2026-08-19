@@ -9,6 +9,8 @@
 
 namespace DragonCronManager;
 
+defined( 'ABSPATH' ) || exit;
+
 class Logger {
 
 	/**

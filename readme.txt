@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.0
 Requires PHP: 8.0
-Stable tag: 1.0.5
+Stable tag: 1.0.6
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -73,14 +73,11 @@ No. Logging is lightweight and old entries are automatically cleaned up based on
 
 A cron is overdue when its scheduled time has passed but it hasn't run yet. This usually happens because WP-Cron only runs when someone visits your site. In development environments with no traffic, crons can pile up.
 
-== Screenshots ==
-
-1. Main dashboard showing all scheduled cron events with Run, Test, and Trash buttons
-2. Trash bin with restore and permanent delete options
-3. Execution history log showing duration and status
-4. Health check status bar
-
 == Changelog ==
+
+= 1.0.6 =
+* Performance: the one-time settings migration no longer re-runs on every page load, and trashed-cron data no longer loads on every request.
+* Clarity: the log tab is now "Run Log" and explains it records manual runs.
 
 = 1.0.5 =
 * Data safety: uninstalling the plugin no longer deletes its data unless you explicitly opt in first — a reinstall now picks up exactly where you left off.

@@ -9,6 +9,8 @@
 
 namespace DragonCronManager;
 
+defined( 'ABSPATH' ) || exit;
+
 class Cron {
 
 	/**
@@ -448,7 +450,7 @@ class Cron {
 			'expires_at' => time() + ( self::TRASH_RETENTION_DAYS * DAY_IN_SECONDS ),
 		);
 
-		update_option( self::TRASH_OPTION, $trashed );
+		update_option( self::TRASH_OPTION, $trashed, false );
 
 		// Unschedule the event
 		$result = wp_unschedule_event( $timestamp, $hook, $args );
@@ -530,7 +532,7 @@ class Cron {
 
 		// Remove from trash
 		unset( $trashed[ $trash_id ] );
-		update_option( self::TRASH_OPTION, $trashed );
+		update_option( self::TRASH_OPTION, $trashed, false );
 
 		/* translators: %s: cron hook name */
 		$restored_message = __( 'Cron event "%s" restored successfully.', 'dragon-cron-manager' );
@@ -555,7 +557,7 @@ class Cron {
 		}
 
 		unset( $trashed[ $trash_id ] );
-		update_option( self::TRASH_OPTION, $trashed );
+		update_option( self::TRASH_OPTION, $trashed, false );
 
 		return true;
 	}
@@ -597,7 +599,7 @@ class Cron {
 		}
 
 		if ( $purged > 0 ) {
-			update_option( self::TRASH_OPTION, $trashed );
+			update_option( self::TRASH_OPTION, $trashed, false );
 		}
 
 		return $purged;

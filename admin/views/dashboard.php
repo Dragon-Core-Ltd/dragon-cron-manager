@@ -13,7 +13,7 @@ defined( 'ABSPATH' ) || exit;
 $dragoncronmanager_tabs = array(
 	'events'    => __( 'Cron Events', 'dragon-cron-manager' ),
 	'trash'     => __( 'Trash', 'dragon-cron-manager' ),
-	'logs'      => __( 'Execution Log', 'dragon-cron-manager' ),
+	'logs'      => __( 'Run Log', 'dragon-cron-manager' ),
 	'schedules' => __( 'Schedules', 'dragon-cron-manager' ),
 );
 ?>
@@ -94,11 +94,11 @@ $dragoncronmanager_tabs = array(
 			<table class="wp-list-table widefat fixed striped dcm-events-table">
 				<thead>
 					<tr>
-						<th class="dcm-col-hook"><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-schedule"><?php esc_html_e( 'Schedule', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-next"><?php esc_html_e( 'Next Run', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-args"><?php esc_html_e( 'Args', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-actions"><?php esc_html_e( 'Actions', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-hook" scope="col"><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-schedule" scope="col"><?php esc_html_e( 'Schedule', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-next" scope="col"><?php esc_html_e( 'Next Run', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-args" scope="col"><?php esc_html_e( 'Args', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-actions" scope="col"><?php esc_html_e( 'Actions', 'dragon-cron-manager' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -180,11 +180,11 @@ $dragoncronmanager_tabs = array(
 			<table class="wp-list-table widefat fixed striped dcm-trash-table">
 				<thead>
 					<tr>
-						<th class="dcm-col-hook"><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-schedule"><?php esc_html_e( 'Schedule', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-trashed"><?php esc_html_e( 'Trashed', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-expires"><?php esc_html_e( 'Auto-Delete', 'dragon-cron-manager' ); ?></th>
-						<th class="dcm-col-actions"><?php esc_html_e( 'Actions', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-hook" scope="col"><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-schedule" scope="col"><?php esc_html_e( 'Schedule', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-trashed" scope="col"><?php esc_html_e( 'Trashed', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-expires" scope="col"><?php esc_html_e( 'Auto-Delete', 'dragon-cron-manager' ); ?></th>
+						<th class="dcm-col-actions" scope="col"><?php esc_html_e( 'Actions', 'dragon-cron-manager' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -241,6 +241,9 @@ $dragoncronmanager_tabs = array(
 
 		<?php elseif ( 'logs' === $tab ) : ?>
 			<!-- Logs Table -->
+			<p class="description">
+				<?php esc_html_e( 'Records runs started from this screen — Run Now and Test Mode. Scheduled WP-Cron ticks run outside the plugin and are not intercepted, so they are not listed here.', 'dragon-cron-manager' ); ?>
+			</p>
 			<div class="dcm-logs-header">
 				<div class="dcm-log-stats">
 					<?php /* translators: %d: total number of log entries */ ?>
@@ -258,10 +261,10 @@ $dragoncronmanager_tabs = array(
 			<table class="wp-list-table widefat fixed striped dcm-logs-table">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
-						<th><?php esc_html_e( 'Start Time', 'dragon-cron-manager' ); ?></th>
-						<th><?php esc_html_e( 'Duration', 'dragon-cron-manager' ); ?></th>
-						<th><?php esc_html_e( 'Status', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Start Time', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Duration', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Status', 'dragon-cron-manager' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -300,9 +303,9 @@ $dragoncronmanager_tabs = array(
 			<table class="wp-list-table widefat fixed striped">
 				<thead>
 					<tr>
-						<th><?php esc_html_e( 'Name', 'dragon-cron-manager' ); ?></th>
-						<th><?php esc_html_e( 'Interval', 'dragon-cron-manager' ); ?></th>
-						<th><?php esc_html_e( 'Display', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Name', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Interval', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Display', 'dragon-cron-manager' ); ?></th>
 					</tr>
 				</thead>
 				<tbody>
