@@ -1,10 +1,10 @@
 === Dragon Cron Manager ===
-Contributors: dragoncore
+Contributors: dragoncoreltd
 Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
-Tested up to: 7.0
+Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.6
+Stable tag: 1.0.7
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,10 @@ No. Logging is lightweight and old entries are automatically cleaned up based on
 A cron is overdue when its scheduled time has passed but it hasn't run yet. This usually happens because WP-Cron only runs when someone visits your site. In development environments with no traffic, crons can pile up.
 
 == Changelog ==
+
+= 1.0.7 =
+* Compatibility: tested up to WordPress 7.1.
+* Housekeeping: corrected the contributor name in the plugin readme.
 
 = 1.0.6 =
 * Performance: the one-time settings migration no longer re-runs on every page load, and trashed-cron data no longer loads on every request.
