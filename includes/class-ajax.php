@@ -87,9 +87,13 @@ class Ajax {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$hook = isset( $_POST['hook'] ) ? sanitize_text_field( wp_unslash( $_POST['hook'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
-		$args_json = isset( $_POST['args'] ) ? sanitize_text_field( wp_unslash( $_POST['args'] ) ) : '[]';
-		$args      = json_decode( stripslashes( $args_json ), true );
+		// Decode the raw JSON without sanitize_text_field: it would corrupt
+		// tag-like or whitespace arguments so the event no longer matches its
+		// scheduled entry. run_event() only runs args that match a real scheduled
+		// event, so the decoded value is validated against the trusted cron array.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified above; JSON decoded and matched against the trusted cron array in run_event().
+		$args_json = isset( $_POST['args'] ) ? wp_unslash( $_POST['args'] ) : '[]';
+		$args      = json_decode( is_string( $args_json ) ? $args_json : '[]', true );
 		$args      = is_array( $args ) ? $args : array();
 
 		if ( empty( $hook ) ) {
@@ -117,9 +121,13 @@ class Ajax {
 
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
 		$hook = isset( $_POST['hook'] ) ? sanitize_text_field( wp_unslash( $_POST['hook'] ) ) : '';
-		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
-		$args_json = isset( $_POST['args'] ) ? sanitize_text_field( wp_unslash( $_POST['args'] ) ) : '[]';
-		$args      = json_decode( stripslashes( $args_json ), true );
+		// Decode the raw JSON without sanitize_text_field: it would corrupt
+		// tag-like or whitespace arguments so the event no longer matches its
+		// scheduled entry. run_event() only runs args that match a real scheduled
+		// event, so the decoded value is validated against the trusted cron array.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified above; JSON decoded and matched against the trusted cron array in run_event().
+		$args_json = isset( $_POST['args'] ) ? wp_unslash( $_POST['args'] ) : '[]';
+		$args      = json_decode( is_string( $args_json ) ? $args_json : '[]', true );
 		$args      = is_array( $args ) ? $args : array();
 
 		if ( empty( $hook ) ) {
