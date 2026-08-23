@@ -114,21 +114,32 @@ class Cron {
 			);
 		}
 
-		// Get event details for rescheduling
+		// Only run events that are ACTUALLY scheduled. Without this, run_event
+		// would fire any hook that merely has a listener, letting an admin (on
+		// multisite, a site admin) invoke network-level or other-plugin callbacks
+		// with crafted arguments. Look the event up the way WordPress keys its
+		// cron array — md5( serialize( $args ) ) — which also makes the argument
+		// match robust to the JSON round-trip the UI performs.
 		$crons           = _get_cron_array();
+		$event_key       = md5( serialize( $args ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- Matches WordPress's own cron-array event keying.
 		$event_schedule  = null;
 		$event_timestamp = null;
+		$event_found     = false;
 
 		foreach ( $crons as $timestamp => $hooks ) {
-			if ( isset( $hooks[ $hook ] ) ) {
-				foreach ( $hooks[ $hook ] as $key => $data ) {
-					if ( $data['args'] === $args ) {
-						$event_schedule  = $data['schedule'] ?? false;
-						$event_timestamp = $timestamp;
-						break 2;
-					}
-				}
+			if ( isset( $hooks[ $hook ][ $event_key ] ) ) {
+				$event_found     = true;
+				$event_schedule  = $hooks[ $hook ][ $event_key ]['schedule'] ?? false;
+				$event_timestamp = $timestamp;
+				break;
 			}
+		}
+
+		if ( ! $event_found ) {
+			return array(
+				'success' => false,
+				'message' => __( 'No scheduled event matches this hook and arguments.', 'dragon-cron-manager' ),
+			);
 		}
 
 		$start_time = microtime( true );
