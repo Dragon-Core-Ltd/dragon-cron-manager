@@ -101,6 +101,7 @@ class Admin {
 					'confirmClear'      => __( 'Are you sure you want to clear all logs?', 'dragon-cron-manager' ),
 					'diagnose'          => __( 'Diagnose', 'dragon-cron-manager' ),
 					'diagnosing'        => __( 'Diagnosing…', 'dragon-cron-manager' ),
+					'enterHook'         => __( 'Enter a hook name.', 'dragon-cron-manager' ),
 				),
 			)
 		);

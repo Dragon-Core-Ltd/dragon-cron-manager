@@ -39,6 +39,7 @@ class Ajax {
 	private function init_hooks(): void {
 		add_action( 'wp_ajax_dragoncronmanager_run_event', array( $this, 'handle_run_event' ) );
 		add_action( 'wp_ajax_dragoncronmanager_test_event', array( $this, 'handle_test_event' ) );
+		add_action( 'wp_ajax_dragoncronmanager_add_event', array( $this, 'handle_add_event' ) );
 		add_action( 'wp_ajax_dragoncronmanager_trash_event', array( $this, 'handle_trash_event' ) );
 		add_action( 'wp_ajax_dragoncronmanager_restore_event', array( $this, 'handle_restore_event' ) );
 		add_action( 'wp_ajax_dragoncronmanager_delete_event', array( $this, 'handle_delete_event' ) );
@@ -107,6 +108,53 @@ class Ajax {
 		} else {
 			wp_send_json_error( $result );
 		}
+	}
+
+	/**
+	 * Handle add-event request: schedule a new single or recurring cron event.
+	 */
+	public function handle_add_event(): void {
+		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
+
+		if ( ! current_user_can( 'manage_options' ) ) {
+			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$hook = isset( $_POST['hook'] ) ? sanitize_text_field( wp_unslash( $_POST['hook'] ) ) : '';
+		if ( '' === $hook || ! preg_match( '/^[A-Za-z0-9_\-]+$/', $hook ) ) {
+			wp_send_json_error( array( 'message' => __( 'Enter a valid hook name (letters, numbers, dashes and underscores only).', 'dragon-cron-manager' ) ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$schedule = isset( $_POST['schedule'] ) ? sanitize_text_field( wp_unslash( $_POST['schedule'] ) ) : '';
+		if ( '' !== $schedule && ! array_key_exists( $schedule, wp_get_schedules() ) ) {
+			wp_send_json_error( array( 'message' => __( 'Unknown schedule.', 'dragon-cron-manager' ) ) );
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$when      = isset( $_POST['timestamp'] ) ? sanitize_text_field( wp_unslash( $_POST['timestamp'] ) ) : '';
+		$timestamp = ctype_digit( $when ) ? (int) $when : (int) strtotime( $when );
+		if ( $timestamp <= 0 ) {
+			$timestamp = time();
+		}
+		// Never schedule in the past; clamp to now so the event is due immediately.
+		$timestamp = max( $timestamp, time() );
+
+		// Decode args as raw JSON (no sanitize_text_field — it would corrupt the
+		// values); the result must be a plain array.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Nonce verified above; JSON decoded and validated to an array below.
+		$args_json = isset( $_POST['args'] ) ? wp_unslash( $_POST['args'] ) : '[]';
+		$args      = json_decode( is_string( $args_json ) && '' !== $args_json ? $args_json : '[]', true );
+		if ( ! is_array( $args ) ) {
+			wp_send_json_error( array( 'message' => __( 'Arguments must be valid JSON (an array).', 'dragon-cron-manager' ) ) );
+		}
+
+		if ( $this->cron->add_event( $hook, $schedule, $timestamp, $args ) ) {
+			wp_send_json_success( array( 'message' => __( 'Event scheduled.', 'dragon-cron-manager' ) ) );
+		}
+
+		wp_send_json_error( array( 'message' => __( 'Could not schedule the event. An identical event may already be scheduled.', 'dragon-cron-manager' ) ) );
 	}
 
 	/**

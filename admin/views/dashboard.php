@@ -90,6 +90,42 @@ $dragoncronmanager_tabs = array(
 	<!-- Tab Content -->
 	<div class="dcm-tab-content">
 		<?php if ( 'events' === $tab ) : ?>
+			<!-- Add Event -->
+			<div class="dcm-add-event">
+				<button type="button" class="button" id="dcm-add-event-toggle" aria-expanded="false">
+					<?php esc_html_e( 'Add Event', 'dragon-cron-manager' ); ?>
+				</button>
+				<div class="dcm-add-event-form" id="dcm-add-event-form" hidden>
+					<p>
+						<label for="dcm-ae-hook"><strong><?php esc_html_e( 'Hook name', 'dragon-cron-manager' ); ?></strong></label><br>
+						<input type="text" id="dcm-ae-hook" class="regular-text" placeholder="my_custom_hook" autocomplete="off">
+					</p>
+					<p>
+						<label for="dcm-ae-schedule"><strong><?php esc_html_e( 'Schedule', 'dragon-cron-manager' ); ?></strong></label><br>
+						<select id="dcm-ae-schedule">
+							<option value=""><?php esc_html_e( 'Once (single event)', 'dragon-cron-manager' ); ?></option>
+							<?php foreach ( $schedules as $dragoncronmanager_sched_key => $dragoncronmanager_sched ) : ?>
+								<option value="<?php echo esc_attr( $dragoncronmanager_sched_key ); ?>">
+									<?php echo esc_html( $dragoncronmanager_sched['display'] ?? $dragoncronmanager_sched_key ); ?>
+								</option>
+							<?php endforeach; ?>
+						</select>
+					</p>
+					<p>
+						<label for="dcm-ae-time"><strong><?php esc_html_e( 'First run', 'dragon-cron-manager' ); ?></strong></label><br>
+						<input type="datetime-local" id="dcm-ae-time">
+						<span class="description"><?php esc_html_e( 'Leave blank to run as soon as possible.', 'dragon-cron-manager' ); ?></span>
+					</p>
+					<p>
+						<label for="dcm-ae-args"><strong><?php esc_html_e( 'Arguments (JSON array, optional)', 'dragon-cron-manager' ); ?></strong></label><br>
+						<input type="text" id="dcm-ae-args" class="regular-text" placeholder="[]" autocomplete="off">
+					</p>
+					<p>
+						<button type="button" class="button button-primary" id="dcm-ae-submit"><?php esc_html_e( 'Schedule Event', 'dragon-cron-manager' ); ?></button>
+					</p>
+				</div>
+			</div>
+
 			<!-- Events Table -->
 			<table class="wp-list-table widefat fixed striped dcm-events-table">
 				<thead>
@@ -242,7 +278,7 @@ $dragoncronmanager_tabs = array(
 		<?php elseif ( 'logs' === $tab ) : ?>
 			<!-- Logs Table -->
 			<p class="description">
-				<?php esc_html_e( 'Records runs started from this screen — Run Now and Test Mode. Scheduled WP-Cron ticks run outside the plugin and are not intercepted, so they are not listed here.', 'dragon-cron-manager' ); ?>
+				<?php esc_html_e( 'Records automatic WP-Cron ticks as they run, plus runs started from this screen (Run Now and Test Mode). The Source column shows which is which.', 'dragon-cron-manager' ); ?>
 			</p>
 			<div class="dcm-logs-header">
 				<div class="dcm-log-stats">
@@ -262,6 +298,7 @@ $dragoncronmanager_tabs = array(
 				<thead>
 					<tr>
 						<th scope="col"><?php esc_html_e( 'Hook', 'dragon-cron-manager' ); ?></th>
+						<th scope="col"><?php esc_html_e( 'Source', 'dragon-cron-manager' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Start Time', 'dragon-cron-manager' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Duration', 'dragon-cron-manager' ); ?></th>
 						<th scope="col"><?php esc_html_e( 'Status', 'dragon-cron-manager' ); ?></th>
@@ -270,12 +307,18 @@ $dragoncronmanager_tabs = array(
 				<tbody>
 					<?php if ( empty( $logs ) ) : ?>
 						<tr>
-							<td colspan="4"><?php esc_html_e( 'No log entries yet.', 'dragon-cron-manager' ); ?></td>
+							<td colspan="5"><?php esc_html_e( 'No log entries yet.', 'dragon-cron-manager' ); ?></td>
 						</tr>
 					<?php else : ?>
 						<?php foreach ( $logs as $dcm_log ) : ?>
+							<?php $dcm_source = ( isset( $dcm_log['source'] ) && 'auto' === $dcm_log['source'] ) ? 'auto' : 'manual'; ?>
 							<tr class="dcm-log-<?php echo esc_attr( $dcm_log['status'] ); ?>">
 								<td><code><?php echo esc_html( $dcm_log['hook'] ); ?></code></td>
+								<td>
+									<span class="dcm-source dcm-source-<?php echo esc_attr( $dcm_source ); ?>">
+										<?php echo 'auto' === $dcm_source ? esc_html__( 'Automatic', 'dragon-cron-manager' ) : esc_html__( 'Manual', 'dragon-cron-manager' ); ?>
+									</span>
+								</td>
 								<td><?php echo esc_html( $dcm_log['start_time'] ); ?></td>
 								<td>
 									<?php if ( $dcm_log['duration'] ) : ?>

@@ -343,4 +343,69 @@
         });
     });
 
+    /**
+     * Toggle the Add Event form.
+     */
+    $(document).on('click', '#dcm-add-event-toggle', function() {
+        const $form = $('#dcm-add-event-form');
+        const isHidden = $form.prop('hidden');
+        $form.prop('hidden', !isHidden);
+        $(this).attr('aria-expanded', isHidden ? 'true' : 'false');
+    });
+
+    /**
+     * Submit a new scheduled event.
+     */
+    $(document).on('click', '#dcm-ae-submit', function() {
+        const $btn = $(this);
+        const hook = ($('#dcm-ae-hook').val() || '').trim();
+        const schedule = $('#dcm-ae-schedule').val() || '';
+        const timeVal = $('#dcm-ae-time').val() || '';
+        const args = ($('#dcm-ae-args').val() || '').trim() || '[]';
+
+        if (!hook) {
+            showToast(dcmAdmin.i18n.enterHook, 'error');
+            return;
+        }
+
+        // Convert the browser-local datetime into an absolute unix timestamp so
+        // the server schedules the correct moment regardless of its timezone.
+        let timestamp = '';
+        if (timeVal) {
+            const parsed = new Date(timeVal).getTime();
+            if (!isNaN(parsed)) {
+                timestamp = Math.floor(parsed / 1000);
+            }
+        }
+
+        $btn.prop('disabled', true);
+
+        $.ajax({
+            url: dcmAdmin.ajaxUrl,
+            type: 'POST',
+            data: {
+                action: 'dragoncronmanager_add_event',
+                nonce: dcmAdmin.nonce,
+                hook: hook,
+                schedule: schedule,
+                timestamp: timestamp,
+                args: args
+            },
+            success: function(response) {
+                if (response.success) {
+                    showToast(response.data.message, 'success');
+                    location.reload();
+                } else {
+                    showToast((response.data && response.data.message) || dcmAdmin.i18n.error, 'error');
+                }
+            },
+            error: function() {
+                showToast(dcmAdmin.i18n.error, 'error');
+            },
+            complete: function() {
+                $btn.prop('disabled', false);
+            }
+        });
+    });
+
 })(jQuery);

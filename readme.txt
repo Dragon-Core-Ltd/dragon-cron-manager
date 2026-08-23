@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.8
+Stable tag: 1.0.9
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,10 @@ No. Logging is lightweight and old entries are automatically cleaned up based on
 A cron is overdue when its scheduled time has passed but it hasn't run yet. This usually happens because WP-Cron only runs when someone visits your site. In development environments with no traffic, crons can pile up.
 
 == Changelog ==
+
+= 1.0.9 =
+* New: automatic WP-Cron runs are now logged as they happen, with duration and success/failure, so the Run Log and the Cron Doctor reflect what really runs on schedule instead of only manual "Run Now" tests. A new Source column marks each entry as Automatic or Manual.
+* New: "Add Event" — schedule a new single or recurring cron event, with arguments, right from the dashboard.
 
 = 1.0.7 =
 * Compatibility: tested up to WordPress 7.1.

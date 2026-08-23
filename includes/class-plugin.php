@@ -19,10 +19,11 @@ class Plugin {
 	/**
 	 * Component instances
 	 */
-	private ?Cron $cron     = null;
-	private ?Logger $logger = null;
-	private ?Admin $admin   = null;
-	private ?Ajax $ajax     = null;
+	private ?Cron $cron               = null;
+	private ?Logger $logger           = null;
+	private ?Admin $admin             = null;
+	private ?Ajax $ajax               = null;
+	private ?Tick_Logger $tick_logger = null;
 
 	/**
 	 * Get singleton instance
@@ -39,8 +40,26 @@ class Plugin {
 	 */
 	private function __construct() {
 		self::migrate_legacy_prefix();
+		self::maybe_upgrade();
 		$this->init_components();
 		$this->init_hooks();
+	}
+
+	/**
+	 * Run schema upgrades when the plugin is updated in place.
+	 *
+	 * create_tables() only runs on activation, so a plugin *update* (which does
+	 * not re-activate) would never pick up new columns. The stored db version is
+	 * compared on every load — a cheap autoloaded-option read — and dbDelta is
+	 * re-run (it is idempotent) only when it differs, so the ALTER runs once per
+	 * update and is in place before any admin page or cron tick writes a log row.
+	 */
+	private static function maybe_upgrade(): void {
+		if ( get_option( 'dragoncronmanager_db_version' ) === DRAGONCRONMANAGER_VERSION ) {
+			return;
+		}
+
+		self::create_tables();
 	}
 
 	/**
@@ -105,10 +124,12 @@ class Plugin {
 	 * Initialize plugin components
 	 */
 	private function init_components(): void {
-		$this->cron   = new Cron();
-		$this->logger = new Logger();
-		$this->ajax   = new Ajax( $this->cron, $this->logger );
-		$this->admin  = new Admin( $this->cron, $this->logger );
+		$this->cron        = new Cron();
+		$this->logger      = new Logger();
+		$this->ajax        = new Ajax( $this->cron, $this->logger );
+		$this->admin       = new Admin( $this->cron, $this->logger );
+		$this->tick_logger = new Tick_Logger( $this->logger );
+		$this->tick_logger->init();
 	}
 
 	/**
@@ -161,6 +182,7 @@ class Plugin {
             end_time datetime DEFAULT NULL,
             duration float DEFAULT NULL,
             status varchar(20) NOT NULL DEFAULT 'running',
+            source varchar(20) NOT NULL DEFAULT 'manual',
             error_message text,
             PRIMARY KEY  (id),
             KEY idx_hook (hook),

@@ -44,11 +44,12 @@ class Logger {
 	/**
 	 * Log cron start
 	 *
-	 * @param string $hook Event hook
-	 * @param array  $args Event arguments
+	 * @param string $hook   Event hook
+	 * @param array  $args   Event arguments
+	 * @param string $source How the run was triggered: 'manual' or 'auto'.
 	 * @return int Log entry ID
 	 */
-	public function log_start( string $hook, array $args = array() ): int {
+	public function log_start( string $hook, array $args = array(), string $source = 'manual' ): int {
 		if ( ! get_option( 'dragoncronmanager_log_enabled', true ) ) {
 			return 0;
 		}
@@ -63,8 +64,9 @@ class Logger {
 				'args'       => wp_json_encode( $args ),
 				'start_time' => current_time( 'mysql' ),
 				'status'     => 'running',
+				'source'     => 'auto' === $source ? 'auto' : 'manual',
 			),
-			array( '%s', '%s', '%s', '%s' )
+			array( '%s', '%s', '%s', '%s', '%s' )
 		);
 
 		return $wpdb->insert_id;
