@@ -10,6 +10,12 @@ See, run, and debug everything WP-Cron is doing — with a doctor that tells you
 
 The **Execution Log** tab records when events ran, how long they took, and errors. **Schedules** lists every registered interval.
 
+### Add Event
+The **Add Event** button on the dashboard schedules a brand-new cron event without touching code: give it a hook name, a schedule (single or recurring), a first-run time, and optional JSON arguments.
+
+### Real-tick logging
+The Run Log now records automatic WP-Cron runs as they happen — with duration and success/failure — not just manual **Run Now** and **Test** runs. A **Source** column marks each entry **Automatic** or **Manual**, and the cron doctor's "last activity" reflects real scheduled runs.
+
 ## The cron doctor
 When something's overdue, press **Diagnose** in the health bar. It runs a live root-cause check:
 - **DISABLE_WP_CRON set but tasks overdue** → your server cron isn't firing; the diagnosis includes the exact crontab line to add.
