@@ -224,18 +224,10 @@ class Ajax {
 
 		$result = $this->cron->trash_event( $hook, $key, $timestamp );
 
-		if ( $result ) {
-			wp_send_json_success(
-				array(
-					'message' => __( 'Cron event moved to trash. It will be permanently deleted in 30 days.', 'dragon-cron-manager' ),
-				)
-			);
+		if ( $result['success'] ) {
+			wp_send_json_success( $result );
 		} else {
-			wp_send_json_error(
-				array(
-					'message' => __( 'Failed to trash cron event.', 'dragon-cron-manager' ),
-				)
-			);
+			wp_send_json_error( $result );
 		}
 	}
 
@@ -311,6 +303,10 @@ class Ajax {
 
 		$count = $this->cron->empty_trash();
 
+		if ( false === $count ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to empty the trash. The trashed events are still listed.', 'dragon-cron-manager' ) ) );
+		}
+
 		wp_send_json_success(
 			array(
 				'message' => sprintf(
@@ -337,7 +333,9 @@ class Ajax {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
-		$this->logger->clear_logs();
+		if ( ! $this->logger->clear_logs() ) {
+			wp_send_json_error( array( 'message' => __( 'Failed to clear the logs. The database refused the request.', 'dragon-cron-manager' ) ) );
+		}
 
 		wp_send_json_success(
 			array(

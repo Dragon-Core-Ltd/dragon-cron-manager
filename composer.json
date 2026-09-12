@@ -16,11 +16,13 @@
 		"squizlabs/php_codesniffer": "^3.7",
 		"wp-coding-standards/wpcs": "^3.0",
 		"phpcompatibility/phpcompatibility-wp": "^2.1",
-		"dealerdirect/phpcodesniffer-composer-installer": "^1.0"
+		"dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+		"phpunit/phpunit": "^11.5"
 	},
 	"scripts": {
 		"phpcs": "phpcs",
 		"phpcbf": "phpcbf",
+		"test": "phpunit",
 		"lint": "phpcs --standard=WordPress --extensions=php --ignore=vendor,node_modules .",
 		"lint:fix": "phpcbf --standard=WordPress --extensions=php --ignore=vendor,node_modules ."
 	},

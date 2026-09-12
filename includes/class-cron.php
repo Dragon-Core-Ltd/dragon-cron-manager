@@ -159,19 +159,33 @@ class Cron {
 			$logger->log_complete( $log_id, $duration );
 
 			// Reschedule the event if it's recurring and reschedule is enabled
-			$rescheduled = false;
+			$rescheduled      = false;
+			$reschedule_error = '';
 			if ( $reschedule && $event_schedule && $event_timestamp ) {
 				// Calculate next run time
 				$schedule_info = wp_get_schedules()[ $event_schedule ] ?? null;
 
 				if ( $schedule_info ) {
-					$next_timestamp = time() + $schedule_info['interval'];
-
-					// Unschedule the old event and reschedule it
-					wp_unschedule_event( $event_timestamp, $hook, $args );
-					wp_schedule_event( $next_timestamp, $event_schedule, $hook, $args );
-					$rescheduled = true;
+					$outcome          = $this->move_recurring_event( $event_timestamp, $event_schedule, $hook, $args, time() + $schedule_info['interval'] );
+					$rescheduled      = $outcome['success'];
+					$reschedule_error = $outcome['message'];
 				}
+			}
+
+			$formatted_duration = number_format( $duration, 3 );
+
+			if ( '' !== $reschedule_error ) {
+				return array(
+					'success'     => false,
+					'message'     => sprintf(
+						/* translators: 1: execution duration in seconds, 2: why rescheduling failed */
+						__( 'Cron event executed in %1$s seconds, but it could not be rescheduled: %2$s', 'dragon-cron-manager' ),
+						$formatted_duration,
+						$reschedule_error
+					),
+					'duration'    => $duration,
+					'rescheduled' => false,
+				);
 			}
 
 			if ( $rescheduled ) {
@@ -184,7 +198,7 @@ class Cron {
 
 			return array(
 				'success'     => true,
-				'message'     => sprintf( $message, number_format( $duration, 3 ) ),
+				'message'     => sprintf( $message, $formatted_duration ),
 				'duration'    => $duration,
 				'rescheduled' => $rescheduled,
 			);
@@ -204,6 +218,112 @@ class Cron {
 				'message' => sprintf( $error_message, $e->getMessage() ),
 			);
 		}
+	}
+
+	/**
+	 * Move a recurring event from its current slot to a new timestamp.
+	 *
+	 * The replacement is booked first and verified in its exact slot; only then
+	 * is the original booking removed, so a refused replacement never touches
+	 * the original. Core applies no duplicate guard to recurring bookings, so
+	 * both may coexist briefly. If the original cannot be removed afterwards,
+	 * the replacement is taken back out; if even that fails, the double
+	 * booking is reported. Every claim is checked against the cron array with
+	 * wp_get_scheduled_event(), never inferred from a return value.
+	 *
+	 * @param int    $old_timestamp  Timestamp of the current booking.
+	 * @param string $schedule       Recurrence name.
+	 * @param string $hook           Event hook.
+	 * @param array  $args           Event arguments.
+	 * @param int    $next_timestamp Timestamp of the new booking.
+	 * @return array{success: bool, message: string} message is empty on success.
+	 */
+	private function move_recurring_event( int $old_timestamp, string $schedule, string $hook, array $args, int $next_timestamp ): array {
+		// Same slot: the booking is already where it should be.
+		if ( $next_timestamp === $old_timestamp ) {
+			return array(
+				'success' => true,
+				'message' => '',
+			);
+		}
+
+		$scheduled = wp_schedule_event( $next_timestamp, $schedule, $hook, $args, true );
+		if ( true !== $scheduled || ! self::booking_exists( $hook, $args, $next_timestamp, $schedule ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf(
+					/* translators: %s: reason WordPress gave */
+					__( '%s The existing booking was left in place.', 'dragon-cron-manager' ),
+					self::schedule_error_reason( $scheduled )
+				),
+			);
+		}
+
+		$unscheduled = wp_unschedule_event( $old_timestamp, $hook, $args, true );
+		if ( true === $unscheduled && ! self::booking_exists( $hook, $args, $old_timestamp ) ) {
+			return array(
+				'success' => true,
+				'message' => '',
+			);
+		}
+
+		$reason = self::schedule_error_reason( $unscheduled );
+
+		// The original is still booked; take the replacement back out so the
+		// schedule is left as it was.
+		wp_unschedule_event( $next_timestamp, $hook, $args );
+		if ( self::booking_exists( $hook, $args, $next_timestamp ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf(
+					/* translators: %s: reason WordPress gave */
+					__( 'the previous booking could not be removed (%s), so this event is now booked twice. Trash one of the two bookings from the Events tab.', 'dragon-cron-manager' ),
+					$reason
+				),
+			);
+		}
+
+		return array(
+			'success' => false,
+			'message' => sprintf(
+				/* translators: %s: reason WordPress gave */
+				__( 'the previous booking could not be removed (%s). The existing booking was left in place.', 'dragon-cron-manager' ),
+				$reason
+			),
+		);
+	}
+
+	/**
+	 * Whether a booking exists in exactly this slot of the cron array.
+	 *
+	 * @param string      $hook      Event hook.
+	 * @param array       $args      Event arguments.
+	 * @param int         $timestamp Slot to check.
+	 * @param string|null $schedule  When given, the booking must also carry this recurrence.
+	 * @return bool
+	 */
+	private static function booking_exists( string $hook, array $args, int $timestamp, ?string $schedule = null ): bool {
+		$event = wp_get_scheduled_event( $hook, $args, $timestamp );
+		if ( ! is_object( $event ) ) {
+			return false;
+		}
+
+		return null === $schedule || ( isset( $event->schedule ) && $event->schedule === $schedule );
+	}
+
+	/**
+	 * Human-readable reason from a wp_schedule_event() / wp_unschedule_event()
+	 * result.
+	 *
+	 * @param mixed $result WP_Error, false, or anything else the call returned.
+	 * @return string
+	 */
+	private static function schedule_error_reason( $result ): string {
+		if ( is_wp_error( $result ) && '' !== $result->get_error_message() ) {
+			return $result->get_error_message();
+		}
+
+		return __( 'WordPress did not apply the change (a plugin may be blocking it, or the cron array could not be saved).', 'dragon-cron-manager' );
 	}
 
 	/**
@@ -430,16 +550,24 @@ class Cron {
 	/**
 	 * Move a cron event to trash instead of deleting permanently
 	 *
+	 * The event is only unscheduled once its trash copy is confirmed saved. If
+	 * the unschedule then fails, the trash entry is removed again; if that
+	 * removal also fails, the retained entry is reported so the admin knows the
+	 * event is both still scheduled and listed in Trash.
+	 *
 	 * @param string $hook      Event hook
 	 * @param string $key       Event key
 	 * @param int    $timestamp Event timestamp
-	 * @return bool Success
+	 * @return array Result with success status and message
 	 */
-	public function trash_event( string $hook, string $key, int $timestamp ): bool {
+	public function trash_event( string $hook, string $key, int $timestamp ): array {
 		$crons = _get_cron_array();
 
 		if ( ! isset( $crons[ $timestamp ][ $hook ][ $key ] ) ) {
-			return false;
+			return array(
+				'success' => false,
+				'message' => __( 'No scheduled event matches this hook, arguments and time.', 'dragon-cron-manager' ),
+			);
 		}
 
 		// Get event data before removing
@@ -463,10 +591,48 @@ class Cron {
 
 		update_option( self::TRASH_OPTION, $trashed, false );
 
-		// Unschedule the event
-		$result = wp_unschedule_event( $timestamp, $hook, $args );
+		$stored = get_option( self::TRASH_OPTION, array() );
+		if ( ! isset( $stored[ $trash_id ] ) ) {
+			return array(
+				'success' => false,
+				'message' => __( 'The cron event could not be saved to the trash, so it was left scheduled.', 'dragon-cron-manager' ),
+			);
+		}
 
-		return false !== $result;
+		$unscheduled = wp_unschedule_event( $timestamp, $hook, $args, true );
+		if ( true === $unscheduled && ! self::booking_exists( $hook, $args, $timestamp ) ) {
+			return array(
+				'success' => true,
+				'message' => __( 'Cron event moved to trash. It will be permanently deleted in 30 days.', 'dragon-cron-manager' ),
+			);
+		}
+
+		$reason = self::schedule_error_reason( $unscheduled );
+
+		// The event is still scheduled; take the trash entry back out.
+		unset( $stored[ $trash_id ] );
+		update_option( self::TRASH_OPTION, $stored, false );
+
+		$stored = get_option( self::TRASH_OPTION, array() );
+		if ( isset( $stored[ $trash_id ] ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf(
+					/* translators: %s: reason WordPress gave */
+					__( 'The cron event could not be unscheduled (%s) and is still listed in the trash as well. It remains scheduled; permanently delete the trash entry rather than restoring it.', 'dragon-cron-manager' ),
+					$reason
+				),
+			);
+		}
+
+		return array(
+			'success' => false,
+			'message' => sprintf(
+				/* translators: %s: reason WordPress gave */
+				__( 'The cron event could not be unscheduled (%s). It was left scheduled.', 'dragon-cron-manager' ),
+				$reason
+			),
+		);
 	}
 
 	/**
@@ -505,6 +671,31 @@ class Cron {
 	}
 
 	/**
+	 * Whether a recurring booking of this hook and arguments already exists.
+	 *
+	 * wp_next_scheduled() answers for one-off events too, which is the wrong
+	 * question when deciding whether restoring a recurring event would double
+	 * book it.
+	 *
+	 * @param string $hook Hook name.
+	 * @param array  $args Event arguments.
+	 * @return bool
+	 */
+	private static function has_recurring_booking( string $hook, array $args ): bool {
+		$key = md5( serialize( $args ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- WordPress keys cron events by exactly this hash.
+
+		foreach ( _get_cron_array() as $events ) {
+			$event = $events[ $hook ][ $key ] ?? null;
+
+			if ( is_array( $event ) && ! empty( $event['schedule'] ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Restore a trashed cron event
 	 *
 	 * @param string $trash_id Trash ID
@@ -525,8 +716,29 @@ class Cron {
 		$args     = $event['args'] ?? array();
 		$schedule = $event['schedule'] ?? false;
 
+		$recurring = $schedule && ! empty( $event['interval'] );
+
+		/*
+		 * A second recurring booking of the same hook and arguments is a genuine
+		 * double booking, so it is refused. One-off events are different:
+		 * WordPress allows several with the same hook and arguments at different
+		 * times and only refuses a duplicate within its own short window, so a
+		 * matching single event elsewhere in the schedule must not block a
+		 * restore.
+		 */
+		if ( $recurring && self::has_recurring_booking( $hook, $args ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf(
+					/* translators: %s: cron hook name */
+					__( 'Cron event "%s" is already scheduled with these arguments, so it was not restored. Permanently delete the trash entry instead.', 'dragon-cron-manager' ),
+					$hook
+				),
+			);
+		}
+
 		// Re-schedule the event
-		if ( $schedule && ! empty( $event['interval'] ) ) {
+		if ( $recurring ) {
 			// Recurring event - schedule from now
 			$result = wp_schedule_event( time(), $schedule, $hook, $args );
 		} else {
@@ -544,6 +756,18 @@ class Cron {
 		// Remove from trash
 		unset( $trashed[ $trash_id ] );
 		update_option( self::TRASH_OPTION, $trashed, false );
+
+		$stored = get_option( self::TRASH_OPTION, array() );
+		if ( isset( $stored[ $trash_id ] ) ) {
+			return array(
+				'success' => false,
+				'message' => sprintf(
+					/* translators: %s: cron hook name */
+					__( 'Cron event "%s" was scheduled again, but it could not be removed from the trash list. Permanently delete the trash entry; restoring it again is refused while the event is scheduled.', 'dragon-cron-manager' ),
+					$hook
+				),
+			);
+		}
 
 		/* translators: %s: cron hook name */
 		$restored_message = __( 'Cron event "%s" restored successfully.', 'dragon-cron-manager' );
@@ -570,19 +794,32 @@ class Cron {
 		unset( $trashed[ $trash_id ] );
 		update_option( self::TRASH_OPTION, $trashed, false );
 
-		return true;
+		// Re-read rather than trust update_option(): it also returns false when
+		// the value is unchanged, so only the stored value proves the delete.
+		$stored = get_option( self::TRASH_OPTION, array() );
+
+		return ! isset( $stored[ $trash_id ] );
 	}
 
 	/**
 	 * Empty all trashed events permanently
 	 *
-	 * @return int Number of events deleted
+	 * @return int|false Number of events deleted, or false when the trash could
+	 *                   not be cleared.
 	 */
-	public function empty_trash(): int {
+	public function empty_trash() {
 		$trashed = get_option( self::TRASH_OPTION, array() );
 		$count   = count( $trashed );
 
+		if ( 0 === $count ) {
+			return 0;
+		}
+
 		delete_option( self::TRASH_OPTION );
+
+		if ( count( get_option( self::TRASH_OPTION, array() ) ) > 0 ) {
+			return false;
+		}
 
 		return $count;
 	}
@@ -600,20 +837,22 @@ class Cron {
 		}
 
 		$now    = time();
-		$purged = 0;
+		$before = count( $trashed );
 
 		foreach ( $trashed as $trash_id => $event ) {
 			if ( $event['expires_at'] <= $now ) {
 				unset( $trashed[ $trash_id ] );
-				++$purged;
 			}
 		}
 
-		if ( $purged > 0 ) {
-			update_option( self::TRASH_OPTION, $trashed, false );
+		if ( count( $trashed ) === $before ) {
+			return 0;
 		}
 
-		return $purged;
+		update_option( self::TRASH_OPTION, $trashed, false );
+
+		// Report only what was actually removed from the stored option.
+		return max( 0, $before - count( get_option( self::TRASH_OPTION, array() ) ) );
 	}
 
 	/**

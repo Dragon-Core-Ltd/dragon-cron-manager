@@ -268,11 +268,13 @@ class Logger {
 
 	/**
 	 * Clear all logs
+	 *
+	 * @return bool Whether the table was truncated.
 	 */
-	public function clear_logs(): void {
+	public function clear_logs(): bool {
 		global $wpdb;
         // phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching,WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name is safe, constructed from $wpdb->prefix
-		$wpdb->query( "TRUNCATE TABLE {$this->table}" );
+		return false !== $wpdb->query( "TRUNCATE TABLE {$this->table}" );
 	}
 
 	/**

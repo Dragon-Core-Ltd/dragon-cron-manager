@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.9
+Stable tag: 1.0.10
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,12 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 
 == Changelog ==
 
+= 1.0.10 =
+* Fixed: "Run" no longer reports a recurring event as rescheduled when WordPress refused the new booking. The existing booking is not removed until the replacement is confirmed in the schedule, and the reason is shown; previously the event was silently dropped.
+* Fixed: trashing an event only unschedules it once the trash copy is confirmed saved, so a failed save can no longer remove an event that has no trash copy to restore.
+* Fixed: restoring, permanently deleting and emptying the trash now check that the change was really saved and report a failure instead of a false success. Restoring an event that is already scheduled is refused instead of booking it twice.
+* Fixed: "Clear logs" reports a failure when the database refuses the request instead of claiming the logs were cleared.
+
 = 1.0.9 =
 * New: automatic WP-Cron runs are now logged as they happen, with duration and success/failure, so the Run Log and the Cron Doctor reflect what really runs on schedule instead of only manual "Run Now" tests. A new Source column marks each entry as Automatic or Manual.
 * New: "Add Event" — schedule a new single or recurring cron event, with arguments, right from the dashboard.
@@ -119,6 +125,9 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 * Tooltips explaining each action
 
 == Upgrade Notice ==
+
+= 1.0.10 =
+Fixes false success messages: Run leaves the existing booking in place when a reschedule is refused, and trash and log actions report failed saves.
 
 = 1.0.0 =
 Initial release.

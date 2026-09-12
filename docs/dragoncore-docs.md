@@ -1,12 +1,12 @@
 # Dragon Cron Manager
 
-See, run, and debug everything WP-Cron is doing — with a doctor that tells you *why* it's stuck, not just that it is.
+See, run, and debug everything WP-Cron is doing - with a doctor that tells you *why* it's stuck, not just that it is.
 
 ## The dashboard
 **Tools → Cron Manager** lists every scheduled event: hook, schedule, next run, arguments. Per event:
-- **Run** — execute now and reschedule the next run.
-- **Test** — execute without touching the schedule (safe for debugging).
-- **Trash** — deleted events go to a 30-day trash and can be restored.
+- **Run** - execute now and reschedule the next run. The existing booking is not removed until the new one is confirmed in the schedule; if WordPress refuses the new booking, the existing one is left in place and the reason is shown.
+- **Test** - execute without touching the schedule (safe for debugging).
+- **Trash** - deleted events go to a 30-day trash and can be restored.
 
 The **Execution Log** tab records when events ran, how long they took, and errors. **Schedules** lists every registered interval.
 
@@ -14,7 +14,7 @@ The **Execution Log** tab records when events ran, how long they took, and error
 The **Add Event** button on the dashboard schedules a brand-new cron event without touching code: give it a hook name, a schedule (single or recurring), a first-run time, and optional JSON arguments.
 
 ### Real-tick logging
-The Run Log now records automatic WP-Cron runs as they happen — with duration and success/failure — not just manual **Run Now** and **Test** runs. A **Source** column marks each entry **Automatic** or **Manual**, and the cron doctor's "last activity" reflects real scheduled runs.
+The Run Log now records automatic WP-Cron runs as they happen - with duration and success/failure - not just manual **Run Now** and **Test** runs. A **Source** column marks each entry **Automatic** or **Manual**, and the cron doctor's "last activity" reflects real scheduled runs.
 
 ## The cron doctor
 When something's overdue, press **Diagnose** in the health bar. It runs a live root-cause check:

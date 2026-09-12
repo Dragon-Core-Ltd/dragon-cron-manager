@@ -8,7 +8,8 @@
      * Show toast notification
      */
     function showToast(message, type) {
-        const $toast = $('<div class="dcm-toast dcm-toast-' + type + '">' + message + '</div>');
+        // Server messages are plain text; set them with .text(), never as HTML.
+        const $toast = $('<div>').addClass('dcm-toast dcm-toast-' + type).text(message);
         $('body').append($toast);
 
         setTimeout(function() {
