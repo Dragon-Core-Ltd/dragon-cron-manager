@@ -24,4 +24,29 @@ final class LoggerTest extends TestCase {
 
 		$this->assertFalse( ( new Logger() )->clear_logs() );
 	}
+
+	public function test_constructing_the_logger_schedules_nothing_before_init(): void {
+		$GLOBALS['dragoncronmanager_test_cron']    = array();
+		$GLOBALS['dragoncronmanager_test_actions'] = array();
+
+		$logger = new Logger();
+
+		$this->assertFalse( wp_next_scheduled( 'dragoncronmanager_cleanup_logs' ) );
+		$this->assertContains( array( $logger, 'ensure_scheduled' ), $GLOBALS['dragoncronmanager_test_actions']['init'] ?? array() );
+	}
+
+	public function test_ensure_scheduled_schedules_cleanup_once(): void {
+		$GLOBALS['dragoncronmanager_test_cron'] = array();
+
+		$logger = new Logger();
+		$logger->ensure_scheduled();
+		$logger->ensure_scheduled();
+
+		$this->assertNotFalse( wp_next_scheduled( 'dragoncronmanager_cleanup_logs' ) );
+		$count = 0;
+		foreach ( $GLOBALS['dragoncronmanager_test_cron'] as $hooks ) {
+			$count += count( $hooks['dragoncronmanager_cleanup_logs'] ?? array() );
+		}
+		$this->assertSame( 1, $count );
+	}
 }

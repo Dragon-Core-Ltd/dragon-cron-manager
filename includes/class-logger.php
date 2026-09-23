@@ -35,7 +35,15 @@ class Logger {
 		// Clean up old logs daily
 		add_action( 'dragoncronmanager_cleanup_logs', array( $this, 'cleanup_old_logs' ) );
 
-		// Schedule cleanup if not scheduled
+		// Scheduling reads every plugin's cron_schedules labels, which are
+		// translated, so it waits for init rather than running on plugins_loaded.
+		add_action( 'init', array( $this, 'ensure_scheduled' ) );
+	}
+
+	/**
+	 * Schedule the daily log cleanup if it is missing.
+	 */
+	public function ensure_scheduled(): void {
 		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_logs' ) ) {
 			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_logs' );
 		}

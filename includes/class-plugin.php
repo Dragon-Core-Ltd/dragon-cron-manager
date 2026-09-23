@@ -105,9 +105,7 @@ class Plugin {
 			}
 		}
 
-		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_trash' ) ) {
-			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_trash' );
-		}
+		// The renamed trash cleanup is scheduled by ensure_trash_scheduled() on init.
 
 		// Flip the trash payload out of autoload on existing installs — it is
 		// only read on the admin screen but was loading on every request.
@@ -137,6 +135,17 @@ class Plugin {
 	 */
 	private function init_hooks(): void {
 		add_action( 'dragoncronmanager_cleanup_trash', array( $this, 'cleanup_expired_trash' ) );
+		add_action( 'init', array( __CLASS__, 'ensure_trash_scheduled' ) );
+	}
+
+	/**
+	 * Schedule the daily trash cleanup if it is missing. Runs on init because
+	 * scheduling reads every plugin's translated cron_schedules labels.
+	 */
+	public static function ensure_trash_scheduled(): void {
+		if ( ! wp_next_scheduled( 'dragoncronmanager_cleanup_trash' ) ) {
+			wp_schedule_event( time(), 'daily', 'dragoncronmanager_cleanup_trash' );
+		}
 	}
 
 	/**
