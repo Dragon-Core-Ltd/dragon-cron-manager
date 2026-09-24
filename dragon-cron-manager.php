@@ -56,6 +56,14 @@ function dragoncronmanager_deactivate() {
 register_deactivation_hook( __FILE__, __NAMESPACE__ . '\dragoncronmanager_deactivate' );
 
 /**
+ * Load bundled translations.
+ */
+function dragoncronmanager_load_textdomain() {
+	load_plugin_textdomain( 'dragon-cron-manager', false, dirname( DRAGONCRONMANAGER_PLUGIN_BASENAME ) . '/languages' );
+}
+add_action( 'init', __NAMESPACE__ . '\dragoncronmanager_load_textdomain', 0 );
+
+/**
  * Initialize the plugin
  */
 function dragoncronmanager_init() {

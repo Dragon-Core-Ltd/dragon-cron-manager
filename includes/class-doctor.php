@@ -111,10 +111,10 @@ class Doctor {
 			$findings[] = array(
 				'severity' => 'critical',
 				'title'    => __( 'Your system cron is not running', 'dragon-cron-manager' ),
-				'detail'   => __( 'DISABLE_WP_CRON is set, which hands scheduling to a server cron job — but tasks are hours overdue, so that job is missing, disabled, or failing.', 'dragon-cron-manager' ),
+				'detail'   => __( 'DISABLE_WP_CRON is set, which hands scheduling to a server cron job - but tasks are hours overdue, so that job is missing, disabled, or failing.', 'dragon-cron-manager' ),
 				'fix'      => sprintf(
 					/* translators: %s: wp-cron.php URL */
-					__( 'Add a server cron entry such as: */5 * * * * curl -s %s >/dev/null 2>&1 — or ask your host to confirm the existing one still runs.', 'dragon-cron-manager' ),
+					__( 'Add a server cron entry such as: */5 * * * * curl -s %s >/dev/null 2>&1 - or ask your host to confirm the existing one still runs.', 'dragon-cron-manager' ),
 					(string) $s['site_url']
 				),
 			);
@@ -140,7 +140,7 @@ class Doctor {
 			$findings[] = array(
 				'severity' => 'warning',
 				'title'    => __( 'A previous cron run appears to have crashed', 'dragon-cron-manager' ),
-				'detail'   => __( 'The doing_cron lock is older than ten minutes, which means a run started and never finished — usually a fatal error or timeout inside one scheduled task.', 'dragon-cron-manager' ),
+				'detail'   => __( 'The doing_cron lock is older than ten minutes, which means a run started and never finished - usually a fatal error or timeout inside one scheduled task.', 'dragon-cron-manager' ),
 				'fix'      => __( 'The lock expires on its own, but if this recurs, check the Logs tab for the task that starts and never completes, and your PHP error log for the fatal.', 'dragon-cron-manager' ),
 			);
 		}
@@ -217,7 +217,7 @@ class Doctor {
 	/**
 	 * Timestamp of the most recent logged cron execution, or 0.
 	 *
-	 * @return int Unix timestamp (site-local converted), 0 when unknown.
+	 * @return int Unix timestamp, 0 when unknown.
 	 */
 	private function last_log_activity(): int {
 		global $wpdb;
@@ -230,6 +230,18 @@ class Doctor {
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Single MAX() over the custom log table on demand; table name is plugin-built, matching Logger's queries (plugin supports WP 6.0, predating %i).
 		$latest = $wpdb->get_var( "SELECT MAX(start_time) FROM {$table}" );
 
-		return $latest ? (int) strtotime( (string) $latest ) : 0;
+		return $latest ? self::log_timestamp( (string) $latest ) : 0;
+	}
+
+	/**
+	 * Unix timestamp for a log start_time, which is stored in site-local time
+	 * (current_time( 'mysql' )).
+	 *
+	 * @param string $local_mysql Site-local MySQL datetime.
+	 * @return int Unix timestamp, 0 when unparseable.
+	 */
+	public static function log_timestamp( string $local_mysql ): int {
+		$gmt = get_gmt_from_date( $local_mysql );
+		return $gmt ? (int) strtotime( $gmt . ' UTC' ) : 0;
 	}
 }

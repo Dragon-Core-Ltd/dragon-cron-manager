@@ -172,14 +172,14 @@ class Cron {
 				}
 			}
 
-			$formatted_duration = number_format( $duration, 3 );
+			$formatted_duration = number_format_i18n( $duration, 3 );
 
 			if ( '' !== $reschedule_error ) {
 				return array(
 					'success'     => false,
 					'message'     => sprintf(
-						/* translators: 1: execution duration in seconds, 2: why rescheduling failed */
-						__( 'Cron event executed in %1$s seconds, but it could not be rescheduled: %2$s', 'dragon-cron-manager' ),
+						/* translators: 1: execution duration in seconds, 2: why rescheduling failed (one or more full sentences) */
+						__( 'Cron event executed in %1$s seconds, but it could not be rescheduled. %2$s', 'dragon-cron-manager' ),
 						$formatted_duration,
 						$reschedule_error
 					),
@@ -277,7 +277,7 @@ class Cron {
 				'success' => false,
 				'message' => sprintf(
 					/* translators: %s: reason WordPress gave */
-					__( 'the previous booking could not be removed (%s), so this event is now booked twice. Trash one of the two bookings from the Events tab.', 'dragon-cron-manager' ),
+					__( 'The previous booking could not be removed (%s), so this event is now booked twice. Trash one of the two bookings from the Events tab.', 'dragon-cron-manager' ),
 					$reason
 				),
 			);
@@ -287,7 +287,7 @@ class Cron {
 			'success' => false,
 			'message' => sprintf(
 				/* translators: %s: reason WordPress gave */
-				__( 'the previous booking could not be removed (%s). The existing booking was left in place.', 'dragon-cron-manager' ),
+				__( 'The previous booking could not be removed (%s). The existing booking was left in place.', 'dragon-cron-manager' ),
 				$reason
 			),
 		);
@@ -430,11 +430,15 @@ class Cron {
 
 		if ( $overdue_count > 0 ) {
 			$health['status'] = 'warning';
-			/* translators: %1$d: number of overdue events, %2$s: time since oldest overdue event */
-			$overdue_message    = __( '%1$d cron events are overdue (oldest: %2$s ago).', 'dragon-cron-manager' );
+			$overdue_message  = sprintf(
+				/* translators: %1$s: number of overdue events, %2$s: time since oldest overdue event */
+				_n( '%1$s cron event is overdue (oldest: %2$s ago).', '%1$s cron events are overdue (oldest: %2$s ago).', $overdue_count, 'dragon-cron-manager' ),
+				number_format_i18n( $overdue_count ),
+				human_time_diff( time() - $max_overdue )
+			);
 			$health['issues'][] = array(
 				'label'   => __( 'Overdue Events', 'dragon-cron-manager' ),
-				'message' => sprintf( $overdue_message, $overdue_count, human_time_diff( time() - $max_overdue ) ),
+				'message' => $overdue_message,
 				'type'    => 'warning',
 			);
 		}
@@ -442,11 +446,14 @@ class Cron {
 		// Check for very large cron array
 		$cron_count = count( $events );
 		if ( $cron_count > 50 ) {
-			/* translators: %d: number of scheduled cron events */
-			$many_events_message = __( 'You have %d scheduled cron events. Consider cleaning up unused ones.', 'dragon-cron-manager' );
-			$health['info'][]    = array(
+			$many_events_message = sprintf(
+				/* translators: %s: number of scheduled cron events */
+				_n( 'You have %s scheduled cron event. Consider cleaning up unused ones.', 'You have %s scheduled cron events. Consider cleaning up unused ones.', $cron_count, 'dragon-cron-manager' ),
+				number_format_i18n( $cron_count )
+			);
+			$health['info'][] = array(
 				'label'   => __( 'Many Cron Events', 'dragon-cron-manager' ),
-				'message' => sprintf( $many_events_message, $cron_count ),
+				'message' => $many_events_message,
 				'type'    => 'info',
 			);
 		}

@@ -35,6 +35,7 @@ function dragoncronmanager_test_reset(): void {
 	$GLOBALS['dragoncronmanager_test_actions']           = array();
 	$GLOBALS['dragoncronmanager_test_fired']             = array();
 	$GLOBALS['wpdb']                                     = new DragonCronManager_Test_Wpdb();
+	$GLOBALS['dragoncronmanager_test_timezone']          = 'UTC';
 }
 
 /**
@@ -137,6 +138,10 @@ function esc_html__( $text, $domain = 'default' ) {
 function _n( $single, $plural, $number, $domain = 'default' ) {
 	unset( $domain );
 	return 1 === (int) $number ? $single : $plural;
+}
+
+function number_format_i18n( $number, $decimals = 0 ) {
+	return number_format( (float) $number, (int) $decimals );
 }
 
 function add_action( $hook, $callback, ...$args ) {
@@ -326,6 +331,18 @@ function current_time( $type, $gmt = 0 ) {
 	return 'mysql' === $type ? gmdate( 'Y-m-d H:i:s' ) : time();
 }
 
+function wp_timezone() {
+	return new DateTimeZone( $GLOBALS['dragoncronmanager_test_timezone'] ?? 'UTC' );
+}
+
+function get_gmt_from_date( $date_string, $format = 'Y-m-d H:i:s' ) {
+	$datetime = date_create( $date_string, wp_timezone() );
+	if ( false === $datetime ) {
+		return false;
+	}
+	return $datetime->setTimezone( new DateTimeZone( 'UTC' ) )->format( $format );
+}
+
 function check_ajax_referer( ...$args ) {
 	unset( $args );
 	return 1;
@@ -392,3 +409,4 @@ dragoncronmanager_test_reset();
 require_once dirname( __DIR__ ) . '/includes/class-cron.php';
 require_once dirname( __DIR__ ) . '/includes/class-logger.php';
 require_once dirname( __DIR__ ) . '/includes/class-ajax.php';
+require_once dirname( __DIR__ ) . '/includes/class-doctor.php';

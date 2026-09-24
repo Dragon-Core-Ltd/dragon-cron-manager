@@ -310,14 +310,14 @@ class Ajax {
 		wp_send_json_success(
 			array(
 				'message' => sprintf(
-					/* translators: %d: number of events deleted */
+					/* translators: %s: number of events deleted */
 					_n(
-						'%d cron event permanently deleted.',
-						'%d cron events permanently deleted.',
+						'%s cron event permanently deleted.',
+						'%s cron events permanently deleted.',
 						$count,
 						'dragon-cron-manager'
 					),
-					$count
+					number_format_i18n( $count )
 				),
 			)
 		);

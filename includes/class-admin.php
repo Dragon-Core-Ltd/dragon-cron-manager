@@ -102,6 +102,8 @@ class Admin {
 					'diagnose'          => __( 'Diagnose', 'dragon-cron-manager' ),
 					'diagnosing'        => __( 'Diagnosing…', 'dragon-cron-manager' ),
 					'enterHook'         => __( 'Enter a hook name.', 'dragon-cron-manager' ),
+					'emptyTrash'        => __( 'Empty Trash', 'dragon-cron-manager' ),
+					'clearLogs'         => __( 'Clear Logs', 'dragon-cron-manager' ),
 				),
 			)
 		);

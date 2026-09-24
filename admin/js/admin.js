@@ -252,12 +252,12 @@
                         location.reload();
                     }, 1000);
                 } else {
-                    $btn.prop('disabled', false).text('Empty Trash');
+                    $btn.prop('disabled', false).text(dcmAdmin.i18n.emptyTrash);
                     showToast(response.data.message || dcmAdmin.i18n.error, 'error');
                 }
             },
             error: function() {
-                $btn.prop('disabled', false).text('Empty Trash');
+                $btn.prop('disabled', false).text(dcmAdmin.i18n.emptyTrash);
                 showToast(dcmAdmin.i18n.error, 'error');
             }
         });
@@ -288,12 +288,12 @@
                         location.reload();
                     }, 1000);
                 } else {
-                    $btn.prop('disabled', false).text('Clear Logs');
+                    $btn.prop('disabled', false).text(dcmAdmin.i18n.clearLogs);
                     showToast(response.data.message || dcmAdmin.i18n.error, 'error');
                 }
             },
             error: function() {
-                $btn.prop('disabled', false).text('Clear Logs');
+                $btn.prop('disabled', false).text(dcmAdmin.i18n.clearLogs);
                 showToast(dcmAdmin.i18n.error, 'error');
             }
         });

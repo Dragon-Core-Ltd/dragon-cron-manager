@@ -10,11 +10,17 @@ defined( 'ABSPATH' ) || exit;
 // phpcs:disable WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedVariableFound -- Template variables are not truly global.
 
 // Provided by Admin::render_dashboard_page(): tab, events, health, summary, schedules, logs, log_stats, trashed_events, trash_count.
-$dragoncronmanager_tabs = array(
+$dragoncronmanager_tabs            = array(
 	'events'    => __( 'Cron Events', 'dragon-cron-manager' ),
 	'trash'     => __( 'Trash', 'dragon-cron-manager' ),
 	'logs'      => __( 'Run Log', 'dragon-cron-manager' ),
 	'schedules' => __( 'Schedules', 'dragon-cron-manager' ),
+);
+$dragoncronmanager_datetime_format = get_option( 'date_format' ) . ' ' . get_option( 'time_format' );
+$dragoncronmanager_status_labels   = array(
+	'running'   => __( 'Running', 'dragon-cron-manager' ),
+	'completed' => __( 'Completed', 'dragon-cron-manager' ),
+	'error'     => __( 'Error', 'dragon-cron-manager' ),
 );
 ?>
 <div class="wrap dragon-ui dcm-dashboard">
@@ -28,7 +34,12 @@ $dragoncronmanager_tabs = array(
 			<?php foreach ( $health['issues'] as $dragoncronmanager_issue ) : ?>
 				<span class="dcm-health-item dcm-health-<?php echo esc_attr( $dragoncronmanager_issue['type'] ); ?>">
 					<span class="dashicons dashicons-<?php echo 'warning' === $dragoncronmanager_issue['type'] ? 'warning' : 'info'; ?>"></span>
-					<strong><?php echo esc_html( $dragoncronmanager_issue['label'] ); ?>:</strong>
+					<strong>
+					<?php
+					/* translators: %s: health check name */
+					echo esc_html( sprintf( __( '%s:', 'dragon-cron-manager' ), $dragoncronmanager_issue['label'] ) );
+					?>
+					</strong>
 					<?php echo esc_html( $dragoncronmanager_issue['message'] ); ?>
 				</span>
 			<?php endforeach; ?>
@@ -36,7 +47,12 @@ $dragoncronmanager_tabs = array(
 				<?php if ( isset( $dragoncronmanager_info['message'] ) ) : ?>
 					<span class="dcm-health-item dcm-health-info">
 						<span class="dashicons dashicons-info"></span>
-						<strong><?php echo esc_html( $dragoncronmanager_info['label'] ); ?>:</strong>
+						<strong>
+					<?php
+					/* translators: %s: health check name */
+					echo esc_html( sprintf( __( '%s:', 'dragon-cron-manager' ), $dragoncronmanager_info['label'] ) );
+					?>
+					</strong>
 						<?php echo esc_html( $dragoncronmanager_info['message'] ); ?>
 					</span>
 				<?php endif; ?>
@@ -57,19 +73,19 @@ $dragoncronmanager_tabs = array(
 	<!-- Stats Cards -->
 	<div class="dcm-stats-grid">
 		<div class="dcm-stat-card">
-			<div class="dcm-stat-number"><?php echo esc_html( $summary['total'] ); ?></div>
+			<div class="dcm-stat-number"><?php echo esc_html( number_format_i18n( $summary['total'] ) ); ?></div>
 			<div class="dcm-stat-label"><?php esc_html_e( 'Total Events', 'dragon-cron-manager' ); ?></div>
 		</div>
 		<div class="dcm-stat-card">
-			<div class="dcm-stat-number"><?php echo esc_html( $summary['recurring'] ); ?></div>
+			<div class="dcm-stat-number"><?php echo esc_html( number_format_i18n( $summary['recurring'] ) ); ?></div>
 			<div class="dcm-stat-label"><?php esc_html_e( 'Recurring', 'dragon-cron-manager' ); ?></div>
 		</div>
 		<div class="dcm-stat-card <?php echo $summary['overdue'] > 0 ? 'dcm-warning' : ''; ?>">
-			<div class="dcm-stat-number"><?php echo esc_html( $summary['overdue'] ); ?></div>
+			<div class="dcm-stat-number"><?php echo esc_html( number_format_i18n( $summary['overdue'] ) ); ?></div>
 			<div class="dcm-stat-label"><?php esc_html_e( 'Overdue', 'dragon-cron-manager' ); ?></div>
 		</div>
 		<div class="dcm-stat-card">
-			<div class="dcm-stat-number"><?php echo esc_html( $log_stats['today'] ); ?></div>
+			<div class="dcm-stat-number"><?php echo esc_html( number_format_i18n( $log_stats['today'] ) ); ?></div>
 			<div class="dcm-stat-label"><?php esc_html_e( 'Runs Today', 'dragon-cron-manager' ); ?></div>
 		</div>
 	</div>
@@ -81,7 +97,7 @@ $dragoncronmanager_tabs = array(
 				class="nav-tab <?php echo $tab === $dragoncronmanager_tab_key ? 'nav-tab-active' : ''; ?>">
 				<?php echo esc_html( $dragoncronmanager_tab_label ); ?>
 				<?php if ( 'trash' === $dragoncronmanager_tab_key && $trash_count > 0 ) : ?>
-					<span class="dcm-trash-count"><?php echo esc_html( $trash_count ); ?></span>
+					<span class="dcm-trash-count"><?php echo esc_html( number_format_i18n( $trash_count ) ); ?></span>
 				<?php endif; ?>
 			</a>
 		<?php endforeach; ?>
@@ -152,12 +168,12 @@ $dragoncronmanager_tabs = array(
 								<td class="dcm-col-hook">
 									<strong><?php echo esc_html( $dragoncronmanager_event['hook'] ); ?></strong>
 									<?php if ( $dragoncronmanager_event['is_core'] ) : ?>
-										<span class="dcm-badge dcm-badge-core" title="<?php esc_attr_e( 'WordPress Core', 'dragon-cron-manager' ); ?>">core</span>
+										<span class="dcm-badge dcm-badge-core" title="<?php esc_attr_e( 'WordPress Core', 'dragon-cron-manager' ); ?>"><?php echo esc_html_x( 'core', 'badge for a WordPress core cron event', 'dragon-cron-manager' ); ?></span>
 									<?php endif; ?>
 								</td>
 								<td class="dcm-col-schedule">
 									<?php if ( $dragoncronmanager_event['is_recurring'] ) : ?>
-										<span class="dcm-schedule"><?php echo esc_html( $dragoncronmanager_event['schedule'] ); ?></span>
+										<span class="dcm-schedule"><?php echo esc_html( $schedules[ $dragoncronmanager_event['schedule'] ]['display'] ?? $dragoncronmanager_event['schedule'] ); ?></span>
 										<br><small><?php echo esc_html( human_time_diff( 0, $dragoncronmanager_event['interval'] ) ); ?></small>
 									<?php else : ?>
 										<span class="dcm-schedule dcm-single"><?php esc_html_e( 'Single', 'dragon-cron-manager' ); ?></span>
@@ -169,7 +185,7 @@ $dragoncronmanager_tabs = array(
 									<?php else : ?>
 										<?php echo esc_html( $dragoncronmanager_event['next_run'] ); ?>
 									<?php endif; ?>
-									<br><small><?php echo esc_html( date_i18n( 'Y-m-d H:i:s', $dragoncronmanager_event['timestamp'] ) ); ?></small>
+									<br><small><?php echo esc_html( wp_date( $dragoncronmanager_datetime_format, $dragoncronmanager_event['timestamp'] ) ); ?></small>
 								</td>
 								<td class="dcm-col-args">
 									<?php if ( ! empty( $dragoncronmanager_event['args'] ) ) : ?>
@@ -236,15 +252,21 @@ $dragoncronmanager_tabs = array(
 								</td>
 								<td class="dcm-col-schedule">
 									<?php if ( $dragoncronmanager_trashed['schedule'] ) : ?>
-										<span class="dcm-schedule"><?php echo esc_html( $dragoncronmanager_trashed['schedule'] ); ?></span>
+										<span class="dcm-schedule"><?php echo esc_html( $schedules[ $dragoncronmanager_trashed['schedule'] ]['display'] ?? $dragoncronmanager_trashed['schedule'] ); ?></span>
 										<br><small><?php echo esc_html( human_time_diff( 0, $dragoncronmanager_trashed['interval'] ) ); ?></small>
 									<?php else : ?>
 										<span class="dcm-schedule dcm-single"><?php esc_html_e( 'Single', 'dragon-cron-manager' ); ?></span>
 									<?php endif; ?>
 								</td>
 								<td class="dcm-col-trashed">
-									<?php echo esc_html( human_time_diff( $dragoncronmanager_trashed['trashed_at'] ) ); ?> <?php esc_html_e( 'ago', 'dragon-cron-manager' ); ?>
-									<br><small><?php echo esc_html( date_i18n( 'Y-m-d H:i:s', $dragoncronmanager_trashed['trashed_at'] ) ); ?></small>
+									<?php
+									printf(
+										/* translators: %s: human-readable time difference */
+										esc_html__( '%s ago', 'dragon-cron-manager' ),
+										esc_html( human_time_diff( $dragoncronmanager_trashed['trashed_at'] ) )
+									);
+									?>
+									<br><small><?php echo esc_html( wp_date( $dragoncronmanager_datetime_format, $dragoncronmanager_trashed['trashed_at'] ) ); ?></small>
 								</td>
 								<td class="dcm-col-expires">
 									<?php if ( $dragoncronmanager_trashed['is_expired'] ) : ?>
@@ -252,9 +274,9 @@ $dragoncronmanager_tabs = array(
 									<?php else : ?>
 										<?php
 										printf(
-											/* translators: %d: number of days */
-											esc_html( _n( '%d day', '%d days', $dragoncronmanager_trashed['days_left'], 'dragon-cron-manager' ) ),
-											esc_html( $dragoncronmanager_trashed['days_left'] )
+											/* translators: %s: number of days */
+											esc_html( _n( '%s day', '%s days', (int) $dragoncronmanager_trashed['days_left'], 'dragon-cron-manager' ) ),
+											esc_html( number_format_i18n( $dragoncronmanager_trashed['days_left'] ) )
 										);
 										?>
 									<?php endif; ?>
@@ -278,16 +300,16 @@ $dragoncronmanager_tabs = array(
 		<?php elseif ( 'logs' === $tab ) : ?>
 			<!-- Logs Table -->
 			<p class="description">
-				<?php esc_html_e( 'Records automatic WP-Cron ticks as they run, plus runs started from this screen (Run Now and Test Mode). The Source column shows which is which.', 'dragon-cron-manager' ); ?>
+				<?php esc_html_e( 'Records automatic WP-Cron ticks as they run, plus runs started from this screen (the Run and Test buttons). The Source column shows which is which.', 'dragon-cron-manager' ); ?>
 			</p>
 			<div class="dcm-logs-header">
 				<div class="dcm-log-stats">
-					<?php /* translators: %d: total number of log entries */ ?>
-					<span><?php printf( esc_html__( 'Total: %d', 'dragon-cron-manager' ), absint( $log_stats['total'] ) ); ?></span>
-					<?php /* translators: %1$d: error count, %2$s: error rate percentage */ ?>
-					<span><?php printf( esc_html__( 'Errors: %1$d (%2$s%%)', 'dragon-cron-manager' ), absint( $log_stats['errors'] ), esc_html( $log_stats['error_rate'] ) ); ?></span>
+					<?php /* translators: %s: total number of log entries */ ?>
+					<span><?php printf( esc_html__( 'Total: %s', 'dragon-cron-manager' ), esc_html( number_format_i18n( $log_stats['total'] ) ) ); ?></span>
+					<?php /* translators: %1$s: error count, %2$s: error rate percentage */ ?>
+					<span><?php printf( esc_html__( 'Errors: %1$s (%2$s%%)', 'dragon-cron-manager' ), esc_html( number_format_i18n( $log_stats['errors'] ) ), esc_html( number_format_i18n( $log_stats['error_rate'], 1 ) ) ); ?></span>
 					<?php /* translators: %s: average duration in seconds */ ?>
-					<span><?php printf( esc_html__( 'Avg Duration: %ss', 'dragon-cron-manager' ), esc_html( $log_stats['avg_duration'] ) ); ?></span>
+					<span><?php printf( esc_html__( 'Avg Duration: %ss', 'dragon-cron-manager' ), esc_html( number_format_i18n( $log_stats['avg_duration'], 3 ) ) ); ?></span>
 				</div>
 				<button type="button" id="dcm-clear-logs" class="button">
 					<?php esc_html_e( 'Clear Logs', 'dragon-cron-manager' ); ?>
@@ -319,17 +341,23 @@ $dragoncronmanager_tabs = array(
 										<?php echo 'auto' === $dcm_source ? esc_html__( 'Automatic', 'dragon-cron-manager' ) : esc_html__( 'Manual', 'dragon-cron-manager' ); ?>
 									</span>
 								</td>
-								<td><?php echo esc_html( $dcm_log['start_time'] ); ?></td>
+								<td><?php echo esc_html( wp_date( $dragoncronmanager_datetime_format, (int) strtotime( get_gmt_from_date( $dcm_log['start_time'] ) . ' UTC' ) ) ); ?></td>
 								<td>
 									<?php if ( $dcm_log['duration'] ) : ?>
-										<?php echo esc_html( number_format( $dcm_log['duration'], 3 ) ); ?>s
+										<?php
+										printf(
+											/* translators: %s: duration in seconds */
+											esc_html__( '%ss', 'dragon-cron-manager' ),
+											esc_html( number_format_i18n( $dcm_log['duration'], 3 ) )
+										);
+										?>
 									<?php else : ?>
 										—
 									<?php endif; ?>
 								</td>
 								<td>
 									<span class="dcm-status dcm-status-<?php echo esc_attr( $dcm_log['status'] ); ?>">
-										<?php echo esc_html( ucfirst( $dcm_log['status'] ) ); ?>
+										<?php echo esc_html( $dragoncronmanager_status_labels[ $dcm_log['status'] ] ?? $dcm_log['status'] ); ?>
 									</span>
 									<?php if ( ! empty( $dcm_log['error_message'] ) ) : ?>
 										<br><small class="dcm-error-msg"><?php echo esc_html( $dcm_log['error_message'] ); ?></small>
@@ -356,7 +384,13 @@ $dragoncronmanager_tabs = array(
 						<tr>
 							<td><code><?php echo esc_html( $dragoncronmanager_name ); ?></code></td>
 							<td>
-								<?php echo esc_html( number_format( $dragoncronmanager_schedule['interval'] ) ); ?> seconds
+								<?php
+								printf(
+									/* translators: %s: number of seconds */
+									esc_html( _n( '%s second', '%s seconds', (int) $dragoncronmanager_schedule['interval'], 'dragon-cron-manager' ) ),
+									esc_html( number_format_i18n( $dragoncronmanager_schedule['interval'] ) )
+								);
+								?>
 								<br><small>(<?php echo esc_html( human_time_diff( 0, $dragoncronmanager_schedule['interval'] ) ); ?>)</small>
 							</td>
 							<td><?php echo esc_html( $dragoncronmanager_schedule['display'] ); ?></td>
