@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.10
+Stable tag: 1.0.11
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -74,6 +74,10 @@ No. Logging is lightweight and old entries are automatically cleaned up based on
 A cron is overdue when its scheduled time has passed but it hasn't run yet. This usually happens because WP-Cron only runs when someone visits your site. In development environments with no traffic, crons can pile up.
 
 == Changelog ==
+
+= 1.0.11 =
+* Fixed: the daily log and trash clean-ups were scheduled before WordPress had finished loading. On any site where the log clean-up needed re-creating, that made WordPress log "translation loading was triggered too early" notices naming other plugins. Scheduling now waits until WordPress is ready. The notices only appeared with debug logging switched on.
+* Changed: the trash clean-up now also restores itself if it goes missing, as the log clean-up already did.
 
 = 1.0.10 =
 * Fixed: "Run" no longer reports a recurring event as rescheduled when WordPress refused the new booking. The existing booking is not removed until the replacement is confirmed in the schedule, and the reason is shown; previously the event was silently dropped.

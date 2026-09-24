@@ -50,7 +50,7 @@ class Plugin {
 	 *
 	 * create_tables() only runs on activation, so a plugin *update* (which does
 	 * not re-activate) would never pick up new columns. The stored db version is
-	 * compared on every load — a cheap autoloaded-option read — and dbDelta is
+	 * compared on every load - a cheap autoloaded-option read - and dbDelta is
 	 * re-run (it is idempotent) only when it differs, so the ALTER runs once per
 	 * update and is in place before any admin page or cron tick writes a log row.
 	 */
@@ -82,11 +82,11 @@ class Plugin {
 		// db_version is a schema marker managed by activation, not user data.
 		delete_option( 'dcm_db_version' );
 
-		// Includes trashed_crons — the recovery payload for cron events the user
+		// Includes trashed_crons - the recovery payload for cron events the user
 		// moved to Trash (unscheduled from WP-cron; restorable for 30 days).
 		$options = array( 'log_enabled', 'log_retention_days', 'trashed_crons' );
 
-		// Copy each legacy value onto the new name, then remove the legacy copy —
+		// Copy each legacy value onto the new name, then remove the legacy copy -
 		// per option, so the delete only ever runs after a successful copy. (A
 		// single shared guard would delete on a deactivate/reactivate cycle, where
 		// activation re-stamps the new db_version before the copy could run.)
@@ -107,7 +107,7 @@ class Plugin {
 
 		// The renamed trash cleanup is scheduled by ensure_trash_scheduled() on init.
 
-		// Flip the trash payload out of autoload on existing installs — it is
+		// Flip the trash payload out of autoload on existing installs - it is
 		// only read on the admin screen but was loading on every request.
 		$dragoncronmanager_trash = get_option( 'dragoncronmanager_trashed_crons', null );
 		if ( null !== $dragoncronmanager_trash ) {
