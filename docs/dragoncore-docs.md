@@ -8,7 +8,7 @@ See, run, and debug everything WP-Cron is doing - with a doctor that tells you *
 - **Test** - execute without touching the schedule (safe for debugging).
 - **Trash** - deleted events go to a 30-day trash and can be restored.
 
-The **Execution Log** tab records when events ran, how long they took, and errors. **Schedules** lists every registered interval.
+The **Execution Log** tab records when events ran, how long they took, and errors. Times are shown in your site's time zone. **Schedules** lists every registered interval.
 
 ### Add Event
 The **Add Event** button on the dashboard schedules a brand-new cron event without touching code: give it a hook name, a schedule (single or recurring), a first-run time, and optional JSON arguments.

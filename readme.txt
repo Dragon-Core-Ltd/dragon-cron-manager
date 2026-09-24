@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.11
+Stable tag: 1.0.12
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,11 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 
 == Changelog ==
 
+= 1.0.12 =
+* Fixed: the cron doctor's "last logged cron activity" time was off by your site's UTC offset.
+* Log times show in your site's time zone.
+* Every screen, email and alert is now translatable, and translations bundled in the plugin's languages folder now load. Counts use proper plural forms, and numbers and dates follow your site's language.
+
 = 1.0.11 =
 * Fixed: the daily log and trash clean-ups were scheduled before WordPress had finished loading. On any site where the log clean-up needed re-creating, that made WordPress log "translation loading was triggered too early" notices naming other plugins. Scheduling now waits until WordPress is ready. The notices only appeared with debug logging switched on.
 * Changed: the trash clean-up now also restores itself if it goes missing, as the log clean-up already did.
@@ -129,6 +134,9 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 * Tooltips explaining each action
 
 == Upgrade Notice ==
+
+= 1.0.12 =
+Fixed: the cron doctor's last-activity time was off by your site's time zone offset.
 
 = 1.0.10 =
 Fixes false success messages: Run leaves the existing booking in place when a reschedule is refused, and trash and log actions report failed saves.
