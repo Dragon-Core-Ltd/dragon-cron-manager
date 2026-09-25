@@ -46,7 +46,7 @@ class Admin {
 	 */
 	public function add_admin_menu(): void {
 		add_management_page(
-			__( 'Cron Manager', 'dragon-cron-manager' ),
+			__( 'Dragon Cron Manager', 'dragon-cron-manager' ),
 			__( 'Cron Manager', 'dragon-cron-manager' ),
 			'manage_options',
 			'dragon-cron-manager',

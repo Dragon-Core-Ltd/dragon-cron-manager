@@ -40,6 +40,7 @@ function dragoncronmanager_test_reset(): void {
 	$GLOBALS['dragoncronmanager_test_multisite']         = false;
 	$GLOBALS['dragoncronmanager_test_filters']           = array();
 	$GLOBALS['dragoncronmanager_test_doing_cron']        = false;
+	$GLOBALS['dragoncronmanager_test_menu_pages']        = array();
 }
 
 /**
@@ -388,6 +389,19 @@ function current_user_can( $capability, ...$args ) {
 
 function is_multisite() {
 	return ! empty( $GLOBALS['dragoncronmanager_test_multisite'] );
+}
+
+function add_management_page( $page_title, $menu_title, $capability, $menu_slug, $callback = '', $position = null ) {
+	unset( $callback, $position );
+	$GLOBALS['dragoncronmanager_test_menu_pages'][ $menu_slug ] = array(
+		'page_title' => $page_title,
+		'menu_title' => $menu_title,
+		'capability' => $capability,
+	);
+	if ( ! current_user_can( $capability ) ) {
+		return false;
+	}
+	return 'tools_page_' . $menu_slug;
 }
 
 function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
