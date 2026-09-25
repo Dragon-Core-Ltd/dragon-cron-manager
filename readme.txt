@@ -53,9 +53,9 @@ No. WP-Cron is WordPress's built-in task scheduler that runs on page loads. For 
 
 = What's the difference between Run and Test? =
 
-**Run** executes the cron and reschedules the next run based on now + interval. For example, an hourly cron run at 2:30pm will next run at 3:30pm.
+**Run** executes the cron and reschedules the next run based on now + interval. For example, an hourly cron run at 2:30pm will next run at 3:30pm. Running a one-time (single) event uses it up, as WP-Cron would, so it does not run again at its old time.
 
-**Test** executes the cron but leaves the schedule unchanged. The original next run time stays the same. This is useful for debugging without affecting the normal schedule.
+**Test** executes the cron but leaves the schedule unchanged, for one-time events too. The original next run time stays the same. This is useful for debugging without affecting the normal schedule.
 
 = Can I recover a deleted cron event? =
 
@@ -63,11 +63,11 @@ Yes! Unlike other cron plugins, Dragon Cron Manager has a Trash Bin. Deleted cro
 
 = Can I break my site by deleting cron events? =
 
-Core WordPress cron events are protected - you cannot trash them. Plugin crons can be trashed safely and restored if needed.
+Events that WordPress core itself schedules (update checks, trash emptying, scheduled post publishing and so on) are protected - you cannot trash them. Plugin crons can be trashed safely and restored if needed, including plugin events whose names start with wp_.
 
 = Does the execution log slow down my site? =
 
-No. Logging is lightweight and old entries are automatically cleaned up based on your retention settings.
+No. Logging is lightweight, and a daily cleanup deletes entries older than 7 days (measured in your site's time zone). To keep them longer, set the number of days with `wp option update dragoncronmanager_log_retention_days 30`.
 
 = What does "overdue" mean? =
 

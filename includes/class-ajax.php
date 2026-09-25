@@ -101,7 +101,12 @@ class Ajax {
 			wp_send_json_error( array( 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ) );
 		}
 
-		$result = $this->cron->run_event( $hook, $args );
+		// Slot of the row that was clicked, so a one-off booked twice runs the
+		// booking the admin chose rather than the earliest.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+		$timestamp = isset( $_POST['timestamp'] ) ? absint( wp_unslash( $_POST['timestamp'] ) ) : 0;
+
+		$result = $this->cron->run_event( $hook, $args, true, $timestamp );
 
 		if ( $result['success'] ) {
 			wp_send_json_success( $result );
@@ -132,9 +137,20 @@ class Ajax {
 			wp_send_json_error( array( 'message' => __( 'Unknown schedule.', 'dragon-cron-manager' ) ) );
 		}
 
+		// The form sends the first run as the site-local date and time it shows
+		// (local_time); a Unix timestamp is still accepted for older callers.
 		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
-		$when      = isset( $_POST['timestamp'] ) ? sanitize_text_field( wp_unslash( $_POST['timestamp'] ) ) : '';
-		$timestamp = ctype_digit( $when ) ? (int) $when : (int) strtotime( $when );
+		$local_time = isset( $_POST['local_time'] ) ? sanitize_text_field( wp_unslash( $_POST['local_time'] ) ) : '';
+		if ( '' !== $local_time ) {
+			$timestamp = Cron::site_time_to_timestamp( $local_time, wp_timezone() );
+			if ( null === $timestamp ) {
+				wp_send_json_error( array( 'message' => __( 'Enter the first run as a date and time, or leave it blank to run as soon as possible.', 'dragon-cron-manager' ) ) );
+			}
+		} else {
+			// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified above.
+			$when      = isset( $_POST['timestamp'] ) ? sanitize_text_field( wp_unslash( $_POST['timestamp'] ) ) : '';
+			$timestamp = ctype_digit( $when ) ? (int) $when : (int) strtotime( $when );
+		}
 		if ( $timestamp <= 0 ) {
 			$timestamp = time();
 		}
@@ -150,8 +166,33 @@ class Ajax {
 			wp_send_json_error( array( 'message' => __( 'Arguments must be valid JSON (an array).', 'dragon-cron-manager' ) ) );
 		}
 
+		if ( '' !== $schedule && Cron::has_recurring_booking( $hook, $args ) ) {
+			wp_send_json_error(
+				array(
+					'message' => sprintf(
+						/* translators: %s: cron hook name */
+						__( 'Cron event "%s" is already scheduled to repeat with these arguments, so it was not added again. Trash the existing event first if you want to replace it.', 'dragon-cron-manager' ),
+						$hook
+					),
+				)
+			);
+		}
+
+		// Checked before scheduling: a one-off event added for "now" is already
+		// due. A recurring one stays listed, rescheduled for its next run.
+		$due_now = '' === $schedule && $timestamp <= time();
+
 		if ( $this->cron->add_event( $hook, $schedule, $timestamp, $args ) ) {
-			wp_send_json_success( array( 'message' => __( 'Event scheduled.', 'dragon-cron-manager' ) ) );
+			// Loading any page spawns WP-Cron for due events, and it removes the
+			// event before running it, so the reloaded list may not show it.
+			wp_send_json_success(
+				array(
+					'message' => $due_now
+						? __( 'Event scheduled to run now. WP-Cron may run it before this list reloads, so it may not appear below.', 'dragon-cron-manager' )
+						: __( 'Event scheduled.', 'dragon-cron-manager' ),
+					'due_now' => $due_now,
+				)
+			);
 		}
 
 		wp_send_json_error( array( 'message' => __( 'Could not schedule the event. An identical event may already be scheduled.', 'dragon-cron-manager' ) ) );

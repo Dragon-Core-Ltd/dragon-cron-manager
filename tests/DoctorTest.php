@@ -27,4 +27,20 @@ final class DoctorTest extends TestCase {
 	public function test_unparseable_log_time_is_unknown(): void {
 		$this->assertSame( 0, Doctor::log_timestamp( 'not a date' ) );
 	}
+
+	public function test_starved_queue_verdict_does_not_claim_it_ran_the_queue(): void {
+		$findings = Doctor::verdict(
+			array(
+				'disable_wp_cron' => false,
+				'max_overdue'     => 2 * HOUR_IN_SECONDS,
+				'lock_age'        => 0,
+				'loopback'        => array( 'ok' => true ),
+				'site_url'        => 'https://example.test/wp-cron.php',
+			)
+		);
+
+		$this->assertCount( 1, $findings );
+		$this->assertStringNotContainsString( 'kicked', $findings[0]['fix'] );
+		$this->assertStringContainsString( 'reach', $findings[0]['detail'] . ' ' . $findings[0]['fix'] );
+	}
 }

@@ -60,8 +60,10 @@ class Doctor {
 	/**
 	 * Collect the live signals the verdict is based on.
 	 *
-	 * The loopback test performs the same spawn a real cron tick would, so a
-	 * pass here both proves the path works and kicks any overdue queue.
+	 * The loopback test requests wp-cron.php the way core's spawn does, which
+	 * proves the site can reach its own cron endpoint. It does not run the
+	 * queue: without core's matching doing_cron lock, wp-cron.php answers and
+	 * exits without running anything.
 	 *
 	 * @return array
 	 */
@@ -150,8 +152,8 @@ class Doctor {
 			$findings[] = array(
 				'severity' => 'warning',
 				'title'    => __( 'Cron can run, but the queue is behind', 'dragon-cron-manager' ),
-				'detail'   => __( 'The spawn mechanism works, yet tasks are overdue. On low-traffic sites WP-Cron only fires when someone visits; a long-running task can also starve everything scheduled after it.', 'dragon-cron-manager' ),
-				'fix'      => __( 'The diagnosis itself just kicked the queue. For a permanent fix on a quiet site, set DISABLE_WP_CRON and add a server cron every 5 minutes; use the Logs tab to spot slow tasks.', 'dragon-cron-manager' ),
+				'detail'   => __( 'The site can reach its own wp-cron.php, yet tasks are overdue. On low-traffic sites WP-Cron only fires when someone visits; a long-running task can also starve everything scheduled after it.', 'dragon-cron-manager' ),
+				'fix'      => __( 'Overdue tasks run on the next visit to the site, or run one now with its Run button. For a permanent fix on a quiet site, set DISABLE_WP_CRON and add a server cron every 5 minutes; use the Logs tab to spot slow tasks.', 'dragon-cron-manager' ),
 			);
 		}
 

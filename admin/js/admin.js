@@ -19,6 +19,30 @@
         }, 3000);
     }
 
+    // A message saved before a reload, shown once the page is back.
+    const PENDING_TOAST_KEY = 'dcmPendingToast';
+
+    function toastAfterReload(message, type) {
+        try {
+            window.sessionStorage.setItem(PENDING_TOAST_KEY, JSON.stringify({ message: message, type: type }));
+        } catch (e) {
+            // Storage unavailable: the toast is simply not carried over.
+        }
+    }
+
+    $(function() {
+        let pending = null;
+        try {
+            pending = JSON.parse(window.sessionStorage.getItem(PENDING_TOAST_KEY) || 'null');
+            window.sessionStorage.removeItem(PENDING_TOAST_KEY);
+        } catch (e) {
+            pending = null;
+        }
+        if (pending && pending.message) {
+            showToast(String(pending.message), pending.type === 'error' ? 'error' : 'success');
+        }
+    });
+
     /**
      * Run cron event
      */
@@ -27,6 +51,7 @@
         const $row = $btn.closest('tr');
         const hook = $row.data('hook');
         const args = $row.data('args');
+        const timestamp = $row.data('timestamp');
 
         $btn.addClass('dcm-running');
 
@@ -37,7 +62,8 @@
                 action: 'dragoncronmanager_run_event',
                 nonce: dcmAdmin.nonce,
                 hook: hook,
-                args: JSON.stringify(args)
+                args: JSON.stringify(args),
+                timestamp: timestamp
             },
             success: function(response) {
                 $btn.removeClass('dcm-running');
@@ -50,6 +76,13 @@
                     }, 1000);
                 } else {
                     showToast(response.data.message || dcmAdmin.i18n.error, 'error');
+                    // The event left the schedule even though it failed:
+                    // reload (after the message can be read) so the row goes.
+                    if (response.data.consumed) {
+                        setTimeout(function() {
+                            location.reload();
+                        }, 4000);
+                    }
                 }
             },
             error: function() {
@@ -369,15 +402,8 @@
             return;
         }
 
-        // Convert the browser-local datetime into an absolute unix timestamp so
-        // the server schedules the correct moment regardless of its timezone.
-        let timestamp = '';
-        if (timeVal) {
-            const parsed = new Date(timeVal).getTime();
-            if (!isNaN(parsed)) {
-                timestamp = Math.floor(parsed / 1000);
-            }
-        }
+        // The field is labelled with the site's timezone, so send the typed
+        // date and time as-is; the server reads it in the site timezone.
 
         $btn.prop('disabled', true);
 
@@ -389,12 +415,16 @@
                 nonce: dcmAdmin.nonce,
                 hook: hook,
                 schedule: schedule,
-                timestamp: timestamp,
+                local_time: timeVal,
                 args: args
             },
             success: function(response) {
                 if (response.success) {
                     showToast(response.data.message, 'success');
+                    // A due-now event can vanish from the reloaded list, so keep the explanation.
+                    if (response.data.due_now) {
+                        toastAfterReload(response.data.message, 'success');
+                    }
                     location.reload();
                 } else {
                     showToast((response.data && response.data.message) || dcmAdmin.i18n.error, 'error');

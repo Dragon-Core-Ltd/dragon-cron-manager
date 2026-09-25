@@ -24,18 +24,32 @@ class Cron {
 	private const TRASH_RETENTION_DAYS = 30;
 
 	/**
-	 * Core WordPress cron hooks (should not be deleted)
+	 * Events WordPress core itself schedules (should not be deleted). Taken
+	 * from core's wp_schedule_event()/wp_schedule_single_event() calls;
+	 * wp_https_detection was scheduled by WordPress 5.7-6.6.
 	 */
 	private const CORE_HOOKS = array(
-		'wp_scheduled_delete',
+		'delete_expired_transients',
+		'do_pings',
+		'importer_scheduled_cleanup',
+		'publish_future_post',
+		'recovery_mode_clean_expired_keys',
+		'update_network_counts',
+		'upgrader_scheduled_cleanup',
+		'wp_delete_temp_updater_backups',
+		'wp_https_detection',
+		'wp_maybe_auto_update',
+		'wp_privacy_delete_old_export_files',
+		'wp_privacy_personal_data_cleanup_requests',
 		'wp_scheduled_auto_draft_delete',
+		'wp_scheduled_delete',
+		'wp_site_health_scheduled_check',
+		'wp_split_shared_term_batch',
+		'wp_update_comment_type_batch',
 		'wp_update_plugins',
 		'wp_update_themes',
+		'wp_update_user_counts',
 		'wp_version_check',
-		'wp_privacy_delete_old_export_files',
-		'wp_site_health_scheduled_check',
-		'recovery_mode_clean_expired_keys',
-		'delete_expired_transients',
 	);
 
 	/**
@@ -103,9 +117,11 @@ class Cron {
 	 * @param string $hook       Event hook
 	 * @param array  $args       Event arguments
 	 * @param bool   $reschedule Whether to reschedule recurring events (default true)
+	 * @param int    $timestamp  Slot of the booking the admin chose (0 = earliest). A
+	 *                           one-off booked more than once runs only at this slot.
 	 * @return array Result with success status and message
 	 */
-	public function run_event( string $hook, array $args = array(), bool $reschedule = true ): array {
+	public function run_event( string $hook, array $args = array(), bool $reschedule = true, int $timestamp = 0 ): array {
 		// Check if hook has any callbacks
 		if ( ! has_action( $hook ) ) {
 			return array(
@@ -126,12 +142,27 @@ class Cron {
 		$event_timestamp = null;
 		$event_found     = false;
 
-		foreach ( $crons as $timestamp => $hooks ) {
-			if ( isset( $hooks[ $hook ][ $event_key ] ) ) {
-				$event_found     = true;
-				$event_schedule  = $hooks[ $hook ][ $event_key ]['schedule'] ?? false;
-				$event_timestamp = $timestamp;
-				break;
+		if ( $timestamp > 0 && isset( $crons[ $timestamp ][ $hook ][ $event_key ] ) ) {
+			$event_found     = true;
+			$event_schedule  = $crons[ $timestamp ][ $hook ][ $event_key ]['schedule'] ?? false;
+			$event_timestamp = $timestamp;
+		} else {
+			foreach ( $crons as $slot => $hooks ) {
+				if ( isset( $hooks[ $hook ][ $event_key ] ) ) {
+					$event_found     = true;
+					$event_schedule  = $hooks[ $hook ][ $event_key ]['schedule'] ?? false;
+					$event_timestamp = $slot;
+					break;
+				}
+			}
+
+			// A recurring event may simply have moved on since the page loaded,
+			// but a one-off elsewhere is a different booking: never consume it.
+			if ( $event_found && $timestamp > 0 && ! $event_schedule ) {
+				return array(
+					'success' => false,
+					'message' => __( 'This one-time event is no longer scheduled at that time, so nothing was run. Reload the page to see the current schedule.', 'dragon-cron-manager' ),
+				);
 			}
 		}
 
@@ -140,6 +171,26 @@ class Cron {
 				'success' => false,
 				'message' => __( 'No scheduled event matches this hook and arguments.', 'dragon-cron-manager' ),
 			);
+		}
+
+		// A one-off event is consumed by running it, as WP-Cron does: remove the
+		// booking first (wp-cron.php unschedules before firing), so it does not
+		// run again at its old slot and a callback that books its own
+		// follow-up is not refused as a duplicate. A Test run keeps it.
+		$consumed = false;
+		if ( $reschedule && ! $event_schedule ) {
+			$removed = wp_unschedule_event( (int) $event_timestamp, $hook, $args, true );
+			if ( true !== $removed || false !== wp_get_scheduled_event( $hook, $args, (int) $event_timestamp ) ) {
+				return array(
+					'success' => false,
+					'message' => sprintf(
+						/* translators: %s: reason WordPress gave */
+						__( 'The event was not run because its booking could not be removed. %s', 'dragon-cron-manager' ),
+						self::schedule_error_reason( $removed )
+					),
+				);
+			}
+			$consumed = true;
 		}
 
 		$start_time = microtime( true );
@@ -191,6 +242,9 @@ class Cron {
 			if ( $rescheduled ) {
 				/* translators: %s: execution duration in seconds */
 				$message = __( 'Cron event executed in %s seconds and rescheduled.', 'dragon-cron-manager' );
+			} elseif ( $consumed ) {
+				/* translators: %s: execution duration in seconds */
+				$message = __( 'One-time event executed in %s seconds and removed from the schedule.', 'dragon-cron-manager' );
 			} else {
 				/* translators: %s: execution duration in seconds */
 				$message = __( 'Cron event executed in %s seconds (schedule unchanged).', 'dragon-cron-manager' );
@@ -210,12 +264,18 @@ class Cron {
 				$logger->log_error( $log_id, $e->getMessage(), $duration );
 			}
 
-			/* translators: %s: error message */
-			$error_message = __( 'Error: %s', 'dragon-cron-manager' );
+			if ( $consumed ) {
+				/* translators: %s: error message */
+				$error_message = __( 'Error: %s The one-time event had already been removed from the schedule, so it will not run again.', 'dragon-cron-manager' );
+			} else {
+				/* translators: %s: error message */
+				$error_message = __( 'Error: %s', 'dragon-cron-manager' );
+			}
 
 			return array(
-				'success' => false,
-				'message' => sprintf( $error_message, $e->getMessage() ),
+				'success'  => false,
+				'message'  => sprintf( $error_message, $e->getMessage() ),
+				'consumed' => $consumed,
 			);
 		}
 	}
@@ -360,6 +420,11 @@ class Cron {
 	 * @return bool Success
 	 */
 	public function add_event( string $hook, string $schedule, int $timestamp, array $args = array() ): bool {
+		// Core has no duplicate guard for recurring bookings.
+		if ( ! empty( $schedule ) && self::has_recurring_booking( $hook, $args ) ) {
+			return false;
+		}
+
 		if ( empty( $schedule ) ) {
 			// Single event
 			$result = wp_schedule_single_event( $timestamp, $hook, $args );
@@ -369,6 +434,28 @@ class Cron {
 		}
 
 		return false !== $result;
+	}
+
+	/**
+	 * Convert a date and time typed in the site's timezone (the value of a
+	 * datetime-local field, with or without seconds) to a Unix timestamp.
+	 *
+	 * @param string        $value Site-local "Y-m-d\TH:i" or "Y-m-d\TH:i:s" (a space may replace the T).
+	 * @param \DateTimeZone $tz    Site timezone.
+	 * @return int|null Timestamp, or null when the value is not a valid date and time.
+	 */
+	public static function site_time_to_timestamp( string $value, \DateTimeZone $tz ): ?int {
+		$value = str_replace( ' ', 'T', trim( $value ) );
+
+		foreach ( array( '!Y-m-d\TH:i:s', '!Y-m-d\TH:i' ) as $format ) {
+			$date   = \DateTimeImmutable::createFromFormat( $format, $value, $tz );
+			$errors = \DateTimeImmutable::getLastErrors();
+			if ( false !== $date && ( false === $errors || ( 0 === $errors['warning_count'] && 0 === $errors['error_count'] ) ) ) {
+				return $date->getTimestamp();
+			}
+		}
+
+		return null;
 	}
 
 	/**
@@ -479,17 +566,9 @@ class Cron {
 	 * @return bool
 	 */
 	public function is_core_hook( string $hook ): bool {
-		// Check against known core hooks
-		if ( in_array( $hook, self::CORE_HOOKS, true ) ) {
-			return true;
-		}
-
-		// Check for wp_ prefix (likely core)
-		if ( strpos( $hook, 'wp_' ) === 0 ) {
-			return true;
-		}
-
-		return false;
+		// Only events core itself schedules. Many plugins use a wp_ prefix too
+		// (wp_rocket_*, wp_1_wc_updater_cron), so a prefix proves nothing.
+		return in_array( $hook, self::CORE_HOOKS, true );
 	}
 
 	/**
@@ -688,7 +767,7 @@ class Cron {
 	 * @param array  $args Event arguments.
 	 * @return bool
 	 */
-	private static function has_recurring_booking( string $hook, array $args ): bool {
+	public static function has_recurring_booking( string $hook, array $args ): bool {
 		$key = md5( serialize( $args ) ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.serialize_serialize -- WordPress keys cron events by exactly this hash.
 
 		foreach ( _get_cron_array() as $events ) {

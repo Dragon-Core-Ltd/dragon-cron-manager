@@ -130,7 +130,15 @@ $dragoncronmanager_status_labels   = array(
 					<p>
 						<label for="dcm-ae-time"><strong><?php esc_html_e( 'First run', 'dragon-cron-manager' ); ?></strong></label><br>
 						<input type="datetime-local" id="dcm-ae-time">
-						<span class="description"><?php esc_html_e( 'Leave blank to run as soon as possible.', 'dragon-cron-manager' ); ?></span>
+						<span class="description">
+							<?php
+							printf(
+								/* translators: %s: the site's timezone, e.g. "Europe/London" or "UTC+2" */
+								esc_html__( 'Site time (%s). Leave blank to run as soon as possible.', 'dragon-cron-manager' ),
+								esc_html( wp_timezone_string() )
+							);
+							?>
+						</span>
 					</p>
 					<p>
 						<label for="dcm-ae-args"><strong><?php esc_html_e( 'Arguments (JSON array, optional)', 'dragon-cron-manager' ); ?></strong></label><br>

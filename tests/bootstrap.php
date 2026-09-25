@@ -87,6 +87,29 @@ class DragonCronManager_Test_Wpdb {
 		$this->queries[] = $sql;
 		return $this->query_result;
 	}
+
+	public function prepare( $query, ...$args ) {
+		if ( 1 === count( $args ) && is_array( $args[0] ) ) {
+			$args = $args[0];
+		}
+		foreach ( $args as $arg ) {
+			$query = preg_replace_callback(
+				'/%[dsf]/',
+				static function ( $m ) use ( $arg ) {
+					if ( '%d' === $m[0] ) {
+						return (string) (int) $arg;
+					}
+					if ( '%f' === $m[0] ) {
+						return (string) (float) $arg;
+					}
+					return "'" . addslashes( (string) $arg ) . "'";
+				},
+				$query,
+				1
+			);
+		}
+		return $query;
+	}
 }
 
 /**
@@ -327,8 +350,14 @@ function wp_json_encode( $data, $options = 0, $depth = 512 ) {
 }
 
 function current_time( $type, $gmt = 0 ) {
-	unset( $gmt );
-	return 'mysql' === $type ? gmdate( 'Y-m-d H:i:s' ) : time();
+	// Core: 'timestamp'/'U' return a Unix timestamp; 'mysql' and any other
+	// format return the wall-clock time in the SITE timezone unless $gmt.
+	if ( 'timestamp' === $type || 'U' === $type ) {
+		return time();
+	}
+	$format = 'mysql' === $type ? 'Y-m-d H:i:s' : $type;
+	$tz     = $gmt ? new DateTimeZone( 'UTC' ) : wp_timezone();
+	return ( new DateTime( 'now', $tz ) )->format( $format );
 }
 
 function wp_timezone() {

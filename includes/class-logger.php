@@ -262,14 +262,22 @@ class Logger {
 	public function cleanup_old_logs(): void {
 		global $wpdb;
 
-		$retention_days = (int) get_option( 'dragoncronmanager_log_retention_days', 7 );
+		// Zero, negative or non-numeric would delete the whole log every day.
+		$retention_days = max( 1, (int) get_option( 'dragoncronmanager_log_retention_days', 7 ) );
+
+		// start_time is written with current_time( 'mysql' ), the site's local
+		// wall clock, so the cutoff is computed on that same clock. The database
+		// server's NOW() runs in its own timezone and would prune early or late.
+		$cutoff = ( new \DateTimeImmutable( current_time( 'mysql' ), new \DateTimeZone( 'UTC' ) ) )
+			->modify( '-' . $retention_days . ' days' )
+			->format( 'Y-m-d H:i:s' );
 
 		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery,WordPress.DB.DirectDatabaseQuery.NoCaching -- Custom logging table.
 		$wpdb->query(
 			$wpdb->prepare(
 				// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- Table name built from $wpdb->prefix.
-				"DELETE FROM {$this->table} WHERE start_time < DATE_SUB(NOW(), INTERVAL %d DAY)",
-				$retention_days
+				"DELETE FROM {$this->table} WHERE start_time < %s",
+				$cutoff
 			)
 		);
 	}
