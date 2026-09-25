@@ -159,7 +159,7 @@ function __( $text, $domain = 'default' ) {
 
 function esc_html__( $text, $domain = 'default' ) {
 	unset( $domain );
-	return $text;
+	return htmlspecialchars( (string) $text, ENT_QUOTES, 'UTF-8', false );
 }
 
 function _n( $single, $plural, $number, $domain = 'default' ) {
