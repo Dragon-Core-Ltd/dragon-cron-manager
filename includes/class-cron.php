@@ -223,36 +223,26 @@ class Cron {
 				}
 			}
 
-			$formatted_duration = number_format_i18n( $duration, 3 );
-
 			if ( '' !== $reschedule_error ) {
 				return array(
 					'success'     => false,
-					'message'     => sprintf(
-						/* translators: 1: execution duration in seconds, 2: why rescheduling failed (one or more full sentences) */
-						__( 'Cron event executed in %1$s seconds, but it could not be rescheduled. %2$s', 'dragon-cron-manager' ),
-						$formatted_duration,
-						$reschedule_error
-					),
+					'message'     => self::executed_message( 'reschedule_failed', $duration, $reschedule_error ),
 					'duration'    => $duration,
 					'rescheduled' => false,
 				);
 			}
 
 			if ( $rescheduled ) {
-				/* translators: %s: execution duration in seconds */
-				$message = __( 'Cron event executed in %s seconds and rescheduled.', 'dragon-cron-manager' );
+				$outcome = 'rescheduled';
 			} elseif ( $consumed ) {
-				/* translators: %s: execution duration in seconds */
-				$message = __( 'One-time event executed in %s seconds and removed from the schedule.', 'dragon-cron-manager' );
+				$outcome = 'removed';
 			} else {
-				/* translators: %s: execution duration in seconds */
-				$message = __( 'Cron event executed in %s seconds (schedule unchanged).', 'dragon-cron-manager' );
+				$outcome = 'unchanged';
 			}
 
 			return array(
 				'success'     => true,
-				'message'     => sprintf( $message, $formatted_duration ),
+				'message'     => self::executed_message( $outcome, $duration ),
 				'duration'    => $duration,
 				'rescheduled' => $rescheduled,
 			);
@@ -949,5 +939,72 @@ class Cron {
 	public function get_trash_count(): int {
 		$trashed = get_option( self::TRASH_OPTION, array() );
 		return count( $trashed );
+	}
+
+	/**
+	 * The message shown after running an event by hand.
+	 *
+	 * @param string $outcome  rescheduled, removed, unchanged or reschedule_failed.
+	 * @param float  $duration How long the callbacks took, in seconds.
+	 * @param string $reason   Why rescheduling failed (one or more full sentences),
+	 *                         for reschedule_failed.
+	 * @return string
+	 */
+	public static function executed_message( string $outcome, float $duration, string $reason = '' ): string {
+		$seconds = number_format_i18n( $duration, 3 );
+		$count   = self::seconds_plural_count( $duration );
+
+		switch ( $outcome ) {
+			case 'reschedule_failed':
+				return sprintf(
+					/* translators: 1: execution duration in seconds, 2: why rescheduling failed (one or more full sentences) */
+					_n(
+						'Cron event executed in %1$s second, but it could not be rescheduled. %2$s',
+						'Cron event executed in %1$s seconds, but it could not be rescheduled. %2$s',
+						$count,
+						'dragon-cron-manager'
+					),
+					$seconds,
+					$reason
+				);
+			case 'rescheduled':
+				return sprintf(
+					/* translators: %s: execution duration in seconds */
+					_n( 'Cron event executed in %s second and rescheduled.', 'Cron event executed in %s seconds and rescheduled.', $count, 'dragon-cron-manager' ),
+					$seconds
+				);
+			case 'removed':
+				return sprintf(
+					/* translators: %s: execution duration in seconds */
+					_n( 'One-time event executed in %s second and removed from the schedule.', 'One-time event executed in %s seconds and removed from the schedule.', $count, 'dragon-cron-manager' ),
+					$seconds
+				);
+			default:
+				return sprintf(
+					/* translators: %s: execution duration in seconds */
+					_n( 'Cron event executed in %s second (schedule unchanged).', 'Cron event executed in %s seconds (schedule unchanged).', $count, 'dragon-cron-manager' ),
+					$seconds
+				);
+		}
+	}
+
+	/**
+	 * The number to choose a plural form by for a duration shown to three places.
+	 *
+	 * Core picks the singular when the integer part is 1, which would read
+	 * "1.500 second". Only a duration that displays as exactly 1.000 is singular;
+	 * a whole number is itself, and a fraction is never counted as one.
+	 *
+	 * @param float $seconds Duration in seconds.
+	 * @return int
+	 */
+	public static function seconds_plural_count( float $seconds ): int {
+		$rounded = round( $seconds, 3 );
+
+		if ( floor( $rounded ) === $rounded ) {
+			return (int) $rounded;
+		}
+
+		return max( 2, (int) ceil( $rounded ) );
 	}
 }

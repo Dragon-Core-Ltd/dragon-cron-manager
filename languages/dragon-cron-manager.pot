@@ -9,7 +9,7 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"POT-Creation-Date: 2026-09-25T00:31:15+00:00\n"
+"POT-Creation-Date: 2026-09-25T01:11:18+00:00\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "X-Generator: WP-CLI 2.11.0\n"
 "X-Domain: dragon-cron-manager\n"
@@ -54,7 +54,7 @@ msgid "Run Log"
 msgstr ""
 
 #: admin/views/dashboard.php:17
-#: includes/class-cron.php:555
+#: includes/class-cron.php:545
 msgid "Schedules"
 msgstr ""
 
@@ -87,7 +87,7 @@ msgid "Diagnosis"
 msgstr ""
 
 #: admin/views/dashboard.php:77
-#: includes/class-cron.php:550
+#: includes/class-cron.php:540
 msgid "Total Events"
 msgstr ""
 
@@ -500,146 +500,154 @@ msgstr ""
 msgid "The event was not run because its booking could not be removed. %s"
 msgstr ""
 
-#. translators: 1: execution duration in seconds, 2: why rescheduling failed (one or more full sentences)
-#: includes/class-cron.php:233
-msgid "Cron event executed in %1$s seconds, but it could not be rescheduled. %2$s"
-msgstr ""
-
-#. translators: %s: execution duration in seconds
-#: includes/class-cron.php:244
-msgid "Cron event executed in %s seconds and rescheduled."
-msgstr ""
-
-#. translators: %s: execution duration in seconds
-#: includes/class-cron.php:247
-msgid "One-time event executed in %s seconds and removed from the schedule."
-msgstr ""
-
-#. translators: %s: execution duration in seconds
-#: includes/class-cron.php:250
-msgid "Cron event executed in %s seconds (schedule unchanged)."
-msgstr ""
-
 #. translators: %s: error message
-#: includes/class-cron.php:269
+#: includes/class-cron.php:259
 msgid "Error: %s The one-time event had already been removed from the schedule, so it will not run again."
 msgstr ""
 
 #. translators: %s: error message
-#: includes/class-cron.php:272
+#: includes/class-cron.php:262
 msgid "Error: %s"
 msgstr ""
 
 #. translators: %s: reason WordPress gave
-#: includes/class-cron.php:316
+#: includes/class-cron.php:306
 msgid "%s The existing booking was left in place."
 msgstr ""
 
 #. translators: %s: reason WordPress gave
-#: includes/class-cron.php:340
+#: includes/class-cron.php:330
 msgid "The previous booking could not be removed (%s), so this event is now booked twice. Trash one of the two bookings from the Events tab."
 msgstr ""
 
 #. translators: %s: reason WordPress gave
-#: includes/class-cron.php:350
+#: includes/class-cron.php:340
 msgid "The previous booking could not be removed (%s). The existing booking was left in place."
 msgstr ""
 
-#: includes/class-cron.php:386
+#: includes/class-cron.php:376
 msgid "WordPress did not apply the change (a plugin may be blocking it, or the cron array could not be saved)."
 msgstr ""
 
-#: includes/class-cron.php:490
+#: includes/class-cron.php:480
 msgid "WP-Cron Disabled"
 msgstr ""
 
-#: includes/class-cron.php:491
+#: includes/class-cron.php:481
 msgid "WP-Cron is disabled. Make sure you have a system cron configured."
 msgstr ""
 
-#: includes/class-cron.php:499
+#: includes/class-cron.php:489
 msgid "Alternate Cron"
 msgstr ""
 
-#: includes/class-cron.php:500
+#: includes/class-cron.php:490
 msgid "Using alternate cron method (redirect-based)."
 msgstr ""
 
 #. translators: %1$s: number of overdue events, %2$s: time since oldest overdue event
-#: includes/class-cron.php:522
+#: includes/class-cron.php:512
 msgid "%1$s cron event is overdue (oldest: %2$s ago)."
 msgid_plural "%1$s cron events are overdue (oldest: %2$s ago)."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-cron.php:527
+#: includes/class-cron.php:517
 msgid "Overdue Events"
 msgstr ""
 
 #. translators: %s: number of scheduled cron events
-#: includes/class-cron.php:538
+#: includes/class-cron.php:528
 msgid "You have %s scheduled cron event. Consider cleaning up unused ones."
 msgid_plural "You have %s scheduled cron events. Consider cleaning up unused ones."
 msgstr[0] ""
 msgstr[1] ""
 
-#: includes/class-cron.php:542
+#: includes/class-cron.php:532
 msgid "Many Cron Events"
 msgstr ""
 
 #. translators: %s: human-readable time difference
-#: includes/class-cron.php:585
+#: includes/class-cron.php:575
 msgid "%s ago (overdue)"
 msgstr ""
 
-#: includes/class-cron.php:590
+#: includes/class-cron.php:580
 msgid "Less than a minute"
 msgstr ""
 
-#: includes/class-cron.php:655
+#: includes/class-cron.php:645
 msgid "No scheduled event matches this hook, arguments and time."
 msgstr ""
 
-#: includes/class-cron.php:684
+#: includes/class-cron.php:674
 msgid "The cron event could not be saved to the trash, so it was left scheduled."
 msgstr ""
 
-#: includes/class-cron.php:692
+#: includes/class-cron.php:682
 msgid "Cron event moved to trash. It will be permanently deleted in 30 days."
 msgstr ""
 
 #. translators: %s: reason WordPress gave
-#: includes/class-cron.php:708
+#: includes/class-cron.php:698
 msgid "The cron event could not be unscheduled (%s) and is still listed in the trash as well. It remains scheduled; permanently delete the trash entry rather than restoring it."
 msgstr ""
 
 #. translators: %s: reason WordPress gave
-#: includes/class-cron.php:718
+#: includes/class-cron.php:708
 msgid "The cron event could not be unscheduled (%s). It was left scheduled."
 msgstr ""
 
-#: includes/class-cron.php:796
+#: includes/class-cron.php:786
 msgid "Trashed event not found."
 msgstr ""
 
 #. translators: %s: cron hook name
-#: includes/class-cron.php:820
+#: includes/class-cron.php:810
 msgid "Cron event \"%s\" is already scheduled with these arguments, so it was not restored. Permanently delete the trash entry instead."
 msgstr ""
 
-#: includes/class-cron.php:838
+#: includes/class-cron.php:828
 msgid "Failed to restore cron event."
 msgstr ""
 
 #. translators: %s: cron hook name
-#: includes/class-cron.php:852
+#: includes/class-cron.php:842
 msgid "Cron event \"%s\" was scheduled again, but it could not be removed from the trash list. Permanently delete the trash entry; restoring it again is refused while the event is scheduled."
 msgstr ""
 
 #. translators: %s: cron hook name
-#: includes/class-cron.php:859
+#: includes/class-cron.php:849
 msgid "Cron event \"%s\" restored successfully."
 msgstr ""
+
+#. translators: 1: execution duration in seconds, 2: why rescheduling failed (one or more full sentences)
+#: includes/class-cron.php:961
+msgid "Cron event executed in %1$s second, but it could not be rescheduled. %2$s"
+msgid_plural "Cron event executed in %1$s seconds, but it could not be rescheduled. %2$s"
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: execution duration in seconds
+#: includes/class-cron.php:973
+msgid "Cron event executed in %s second and rescheduled."
+msgid_plural "Cron event executed in %s seconds and rescheduled."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: execution duration in seconds
+#: includes/class-cron.php:979
+msgid "One-time event executed in %s second and removed from the schedule."
+msgid_plural "One-time event executed in %s seconds and removed from the schedule."
+msgstr[0] ""
+msgstr[1] ""
+
+#. translators: %s: execution duration in seconds
+#: includes/class-cron.php:985
+msgid "Cron event executed in %s second (schedule unchanged)."
+msgid_plural "Cron event executed in %s seconds (schedule unchanged)."
+msgstr[0] ""
+msgstr[1] ""
 
 #: includes/class-doctor.php:115
 msgid "Your system cron is not running"
