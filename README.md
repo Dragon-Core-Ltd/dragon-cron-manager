@@ -12,7 +12,7 @@ Part of the [Dragon Core](https://dragoncore.ltd) plugin family — download it 
 - **Run Now** — Execute any cron job and automatically reschedule the next run
 - **Test Mode** — Run a cron without changing its schedule (perfect for debugging)
 - **Trash Bin** — Deleted crons go to trash and can be restored for 30 days
-- **Execution Log** — Track when crons ran, how long they took, and any errors
+- **Run Log** - Track when crons ran, how long they took, and any errors
 - **Health Check + Cron Doctor** — Overdue and config issues at a glance, plus a one-click diagnosis that tells you WHY cron is stuck: missing system cron (with the crontab line), failing loopback (with the exact error), or a crashed run holding the lock
 - **Schedules Overview** — See all registered cron intervals
 

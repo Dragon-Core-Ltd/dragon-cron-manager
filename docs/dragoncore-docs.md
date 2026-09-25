@@ -8,13 +8,13 @@ See, run, and debug everything WP-Cron is doing - with a doctor that tells you *
 - **Test** - execute without touching the schedule (safe for debugging).
 - **Trash** - deleted events go to a 30-day trash and can be restored.
 
-The **Execution Log** tab records when events ran, how long they took, and errors. Times are shown in your site's time zone. **Schedules** lists every registered interval.
+The **Run Log** tab records when events ran, how long they took, and errors. Times are shown in your site's time zone. **Schedules** lists every registered interval.
 
 ### Add Event
-The **Add Event** button on the dashboard schedules a brand-new cron event without touching code: give it a hook name, a schedule (single or recurring), a first-run time, and optional JSON arguments. The first-run time is read in your site's time zone (shown next to the field), not your browser's.
+The **Add Event** button on the dashboard schedules a brand-new cron event without touching code: give it a hook name, a schedule (single or recurring), a first-run time, and optional JSON arguments. The first-run time is read in your site's time zone (shown next to the field), not your browser's. On multisite, adding an event needs a network administrator (the `manage_network_options` capability).
 
 ### Real-tick logging
-The Run Log now records automatic WP-Cron runs as they happen - with duration and success/failure - not just manual **Run Now** and **Test** runs. A **Source** column marks each entry **Automatic** or **Manual**, and the cron doctor's "last activity" reflects real scheduled runs.
+The Run Log now records automatic WP-Cron runs as they happen - with duration and success/failure - not just manual **Run Now** and **Test** runs. A **Source** column marks each entry **Automatic** or **Manual**, and the cron doctor's "last activity" reflects real scheduled runs. Events a server cron runs with WP-CLI (`wp cron event run --due-now`) are logged the same way.
 
 ## The cron doctor
 When something's overdue, press **Diagnose** in the health bar. It runs a live root-cause check:

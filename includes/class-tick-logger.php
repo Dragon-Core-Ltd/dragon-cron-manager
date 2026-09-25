@@ -57,7 +57,8 @@ class Tick_Logger {
 	 *
 	 * Registration is deferred to wp_loaded priority 0 (before core's alternate
 	 * cron runner at priority 20) and only ever attaches on requests that can
-	 * execute cron — never on admin or AJAX requests, so has_action() stays clean
+	 * execute cron (including WP-CLI, which runs events with `wp cron event run`)
+	 * — never on admin or AJAX requests, so has_action() stays clean
 	 * for the "is this event actually scheduled?" guard in Cron::run_event().
 	 */
 	public function init(): void {
@@ -88,7 +89,11 @@ class Tick_Logger {
 			&& isset( $_SERVER['REQUEST_METHOD'] )
 			&& 'GET' === $_SERVER['REQUEST_METHOD'];
 
-		if ( ! $doing_cron && ! $alternate ) {
+		// `wp cron event run` defines DOING_CRON only as it runs each event,
+		// after wp_loaded; the listeners self-gate on wp_doing_cron().
+		$cli = ! $doing_cron && ! $alternate && $this->running_under_cli();
+
+		if ( ! $doing_cron && ! $alternate && ! $cli ) {
 			return;
 		}
 
@@ -174,6 +179,15 @@ class Tick_Logger {
 		}
 
 		$this->stack = array();
+	}
+
+	/**
+	 * Whether this request is a WP-CLI command.
+	 *
+	 * @return bool
+	 */
+	protected function running_under_cli(): bool {
+		return defined( 'WP_CLI' ) && WP_CLI;
 	}
 
 	/**

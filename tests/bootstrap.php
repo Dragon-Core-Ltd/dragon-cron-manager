@@ -36,6 +36,10 @@ function dragoncronmanager_test_reset(): void {
 	$GLOBALS['dragoncronmanager_test_fired']             = array();
 	$GLOBALS['wpdb']                                     = new DragonCronManager_Test_Wpdb();
 	$GLOBALS['dragoncronmanager_test_timezone']          = 'UTC';
+	$GLOBALS['dragoncronmanager_test_denied_caps']       = array();
+	$GLOBALS['dragoncronmanager_test_multisite']         = false;
+	$GLOBALS['dragoncronmanager_test_filters']           = array();
+	$GLOBALS['dragoncronmanager_test_doing_cron']        = false;
 }
 
 /**
@@ -377,10 +381,36 @@ function check_ajax_referer( ...$args ) {
 	return 1;
 }
 
-function current_user_can( ...$args ) {
+function current_user_can( $capability, ...$args ) {
 	unset( $args );
+	return ! in_array( $capability, $GLOBALS['dragoncronmanager_test_denied_caps'] ?? array(), true );
+}
+
+function is_multisite() {
+	return ! empty( $GLOBALS['dragoncronmanager_test_multisite'] );
+}
+
+function add_filter( $hook, $callback, $priority = 10, $accepted_args = 1 ) {
+	unset( $priority );
+	$GLOBALS['dragoncronmanager_test_filters'][ $hook ][] = array( $callback, (int) $accepted_args );
 	return true;
 }
+
+function apply_filters( $hook, $value, ...$args ) {
+	foreach ( $GLOBALS['dragoncronmanager_test_filters'][ $hook ] ?? array() as $filter ) {
+		$value = call_user_func_array( $filter[0], array_slice( array_merge( array( $value ), $args ), 0, $filter[1] ) );
+	}
+	return $value;
+}
+
+function site_url( $path = '' ) {
+	return 'https://example.test/' . ltrim( (string) $path, '/' );
+}
+
+function wp_doing_cron() {
+	return ! empty( $GLOBALS['dragoncronmanager_test_doing_cron'] );
+}
+
 
 function wp_send_json_success( $data = null ) {
 	throw new DragonCronManager_Test_Json_Exit( true, $data );
@@ -439,3 +469,4 @@ require_once dirname( __DIR__ ) . '/includes/class-cron.php';
 require_once dirname( __DIR__ ) . '/includes/class-logger.php';
 require_once dirname( __DIR__ ) . '/includes/class-ajax.php';
 require_once dirname( __DIR__ ) . '/includes/class-doctor.php';
+require_once dirname( __DIR__ ) . '/includes/class-tick-logger.php';

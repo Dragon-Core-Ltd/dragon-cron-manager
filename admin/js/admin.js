@@ -51,6 +51,8 @@
         const $row = $btn.closest('tr');
         const hook = $row.data('hook');
         const args = $row.data('args');
+        // attr, not data: jQuery would turn an all-digit key into a number.
+        const key = $row.attr('data-key');
         const timestamp = $row.data('timestamp');
 
         $btn.addClass('dcm-running');
@@ -63,6 +65,7 @@
                 nonce: dcmAdmin.nonce,
                 hook: hook,
                 args: JSON.stringify(args),
+                key: key,
                 timestamp: timestamp
             },
             success: function(response) {
@@ -100,6 +103,8 @@
         const $row = $btn.closest('tr');
         const hook = $row.data('hook');
         const args = $row.data('args');
+        // attr, not data: jQuery would turn an all-digit key into a number.
+        const key = $row.attr('data-key');
 
         $btn.addClass('dcm-running');
 
@@ -110,7 +115,8 @@
                 action: 'dragoncronmanager_test_event',
                 nonce: dcmAdmin.nonce,
                 hook: hook,
-                args: JSON.stringify(args)
+                args: JSON.stringify(args),
+                key: key
             },
             success: function(response) {
                 $btn.removeClass('dcm-running');

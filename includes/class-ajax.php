@@ -96,6 +96,7 @@ class Ajax {
 		$args_json = isset( $_POST['args'] ) ? wp_unslash( $_POST['args'] ) : '[]';
 		$args      = json_decode( is_string( $args_json ) ? $args_json : '[]', true );
 		$args      = is_array( $args ) ? $args : array();
+		$args      = $this->scheduled_args( $hook, $args );
 
 		if ( empty( $hook ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ) );
@@ -116,12 +117,38 @@ class Ajax {
 	}
 
 	/**
+	 * The scheduled arguments of the event the row's key names.
+	 *
+	 * JSON cannot carry every PHP value (1.0 comes back as 1, integers above
+	 * 2^53 lose precision), so the row sends the event's key and the
+	 * arguments are taken from the cron array itself. Without a matching key
+	 * the posted arguments are used.
+	 *
+	 * @param string $hook Event hook.
+	 * @param array  $args Arguments decoded from the request.
+	 * @return array
+	 */
+	private function scheduled_args( string $hook, array $args ): array {
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by the calling handler.
+		$key = isset( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
+		if ( 1 !== preg_match( '/^[a-f0-9]{32}$/', $key ) ) {
+			return $args;
+		}
+
+		$found = Cron::args_for_key( $hook, $key );
+
+		return null === $found ? $args : $found;
+	}
+
+	/**
 	 * Handle add-event request: schedule a new single or recurring cron event.
 	 */
 	public function handle_add_event(): void {
 		check_ajax_referer( 'dragoncronmanager_admin_nonce', 'nonce' );
 
-		if ( ! current_user_can( 'manage_options' ) ) {
+		// On multisite any hook can be booked with any arguments, including
+		// network-level callbacks, so adding an event is a network admin's job.
+		if ( ! current_user_can( 'manage_options' ) || ( is_multisite() && ! current_user_can( 'manage_network_options' ) ) ) {
 			wp_send_json_error( array( 'message' => __( 'Permission denied.', 'dragon-cron-manager' ) ) );
 		}
 
@@ -218,6 +245,7 @@ class Ajax {
 		$args_json = isset( $_POST['args'] ) ? wp_unslash( $_POST['args'] ) : '[]';
 		$args      = json_decode( is_string( $args_json ) ? $args_json : '[]', true );
 		$args      = is_array( $args ) ? $args : array();
+		$args      = $this->scheduled_args( $hook, $args );
 
 		if ( empty( $hook ) ) {
 			wp_send_json_error( array( 'message' => __( 'Invalid hook.', 'dragon-cron-manager' ) ) );

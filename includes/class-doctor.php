@@ -172,21 +172,51 @@ class Doctor {
 	}
 
 	/**
+	 * The spawn request core cron sends, made blocking so it can be judged.
+	 *
+	 * Built like spawn_cron() and passed through core's `cron_request`
+	 * filter, so a site that adds credentials or rewrites the URL there (basic
+	 * auth, an internal host name) is tested the way cron really reaches it.
+	 *
+	 * @param string $key Value for doing_wp_cron.
+	 * @return array{url: string, args: array}
+	 */
+	public static function loopback_request( string $key ): array {
+		$request = array(
+			'url'  => site_url( 'wp-cron.php?doing_wp_cron=' . rawurlencode( $key ) ),
+			'key'  => $key,
+			'args' => array(
+				'timeout'   => 0.01,
+				'blocking'  => false,
+				/** This filter is documented in wp-includes/class-wp-http-streams.php */
+				'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
+			),
+		);
+
+		/** This filter is documented in wp-includes/cron.php */
+		$filtered = apply_filters( 'cron_request', $request, $key );
+		if ( is_array( $filtered ) && isset( $filtered['url'] ) && is_string( $filtered['url'] ) ) {
+			$request = $filtered;
+		}
+
+		$args             = is_array( $request['args'] ?? null ) ? $request['args'] : array();
+		$args['timeout']  = 10;
+		$args['blocking'] = true;
+
+		return array(
+			'url'  => (string) $request['url'],
+			'args' => $args,
+		);
+	}
+
+	/**
 	 * Perform the same spawn request core cron uses and report the outcome.
 	 *
 	 * @return array{ok: bool, status: int, error: string}
 	 */
 	private function loopback_test(): array {
-		$url      = site_url( 'wp-cron.php?doing_wp_cron=' . rawurlencode( (string) microtime( true ) ) );
-		$response = wp_remote_post(
-			$url,
-			array(
-				'timeout'   => 10,
-				'blocking'  => true,
-				/** This filter is documented in wp-includes/cron.php */
-				'sslverify' => apply_filters( 'https_local_ssl_verify', false ),
-			)
-		);
+		$request  = self::loopback_request( sprintf( '%.22F', microtime( true ) ) );
+		$response = wp_remote_post( $request['url'], $request['args'] );
 
 		if ( is_wp_error( $response ) ) {
 			return array(

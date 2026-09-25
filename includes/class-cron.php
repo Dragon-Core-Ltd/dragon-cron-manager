@@ -112,6 +112,24 @@ class Cron {
 	}
 
 	/**
+	 * Arguments of a scheduled event, found by hook and event key.
+	 *
+	 * @param string $hook Event hook.
+	 * @param string $key  md5 of the serialized arguments, as the cron array keys it.
+	 * @return array|null Arguments, or null when no scheduled event matches.
+	 */
+	public static function args_for_key( string $hook, string $key ): ?array {
+		foreach ( (array) _get_cron_array() as $hooks ) {
+			if ( isset( $hooks[ $hook ][ $key ] ) ) {
+				$args = $hooks[ $hook ][ $key ]['args'] ?? array();
+				return is_array( $args ) ? $args : array();
+			}
+		}
+
+		return null;
+	}
+
+	/**
 	 * Run a cron event immediately
 	 *
 	 * @param string $hook       Event hook
