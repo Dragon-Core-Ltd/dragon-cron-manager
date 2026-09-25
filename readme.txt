@@ -4,7 +4,7 @@ Tags: cron, scheduled tasks, wp-cron, debug, developer
 Requires at least: 6.0
 Tested up to: 7.1
 Requires PHP: 8.0
-Stable tag: 1.0.12
+Stable tag: 1.0.13
 License: GPLv2 or later
 License URI: https://www.gnu.org/licenses/gpl-2.0.html
 
@@ -75,6 +75,12 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 
 == Changelog ==
 
+= 1.0.13 =
+* Fixed: the cron doctor's last-activity time was off by your site's time zone offset.
+* Only true WordPress core events are protected, so plugin events such as wp_rocket_* can be removed.
+* Running a one-off event now removes its booking, so it doesn't run twice.
+* Log pruning and added events use your site's time zone, and a duplicate recurring event is refused.
+
 = 1.0.12 =
 * Fixed: the cron doctor's "last logged cron activity" time was off by your site's UTC offset.
 * Log times show in your site's time zone.
@@ -134,6 +140,9 @@ A cron is overdue when its scheduled time has passed but it hasn't run yet. This
 * Tooltips explaining each action
 
 == Upgrade Notice ==
+
+= 1.0.13 =
+Cron fixes for non-UTC sites and one-off events.
 
 = 1.0.12 =
 Fixed: the cron doctor's last-activity time was off by your site's time zone offset.
